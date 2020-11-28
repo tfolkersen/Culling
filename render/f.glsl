@@ -11,7 +11,6 @@ void main() {
 	vec3 normal = normalize(v_Normal);
 	vec3 lightDir = normalize(u_LightPos - v_Position);
 	float nDotL = max(0.0, dot(normal, lightDir));
-	nDotL += 0.4;
 	vec3 diffuse = u_LightColor * v_Color.rgb * nDotL;
 	vec3 ambient = u_AmbientLight * v_Color.rgb;
 	color = diffuse + ambient;

@@ -14,7 +14,7 @@ GLuint u_LightPos, u_LightColor, u_AmbientLight, u_MvpMat, u_ModelMat, u_NormalM
 
 glm::vec3 lightPos(6.0f, 6.0f, 0.0f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-glm::vec3 ambientLight(0.4f, 0.4f, 0.4f);
+glm::vec3 ambientLight(0.2f, 0.2f, 0.2f);
 
 glm::mat4 mvp;
 glm::mat4 model;
@@ -77,7 +77,11 @@ void makeModels() {
 	const static GLfloat boxPos[] = {
 	-1.0f, 0.0f, 0.0f, //1
 	-1.0f, 1.0f, 0.0f, //7
-	1.0f, 1.0f, 0.0f //9
+	1.0f, 1.0f, 0.0f, //9
+
+	1.0f, 1.0f, 0.0f, //9
+	1.0f, 0.0f, 0.0f, //3
+	-1.0f, 0.0f, 0.0f //1
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boxPos), boxPos, GL_STATIC_DRAW);
 
@@ -86,7 +90,11 @@ void makeModels() {
 	const static GLfloat boxCol[] = {
 		1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f
+		0.0f, 0.0f, 1.0f,
+
+		0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boxCol), boxCol, GL_STATIC_DRAW);
 
@@ -95,11 +103,14 @@ void makeModels() {
 	const static GLfloat boxNorm[] = {
 		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boxNorm), boxNorm, GL_STATIC_DRAW);
 
-	box.nVerts = 3;
+	box.nVerts = 6;
 }
 
 void init() {
