@@ -224,9 +224,20 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 
 
 	//std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
+	GLfloat minY = std::min(p1.y, std::min(p2.y, p3.y));
+	GLfloat maxY = std::max(p1.y, std::max(p2.y, p3.y));
+	GLfloat minX = std::min(p1.x, std::min(p2.x, p3.x));
+	GLfloat maxX = std::max(p1.x, std::max(p2.x, p3.x));
 
-	for (int i = 0; i < dBuffer.heightB; i++) {
-		for (int j = 0; j < dBuffer.widthB; j++) {
+	int iStart = std::max(((int)minY) / BLOCK_HEIGHT, 0);
+	int iEnd = std::min(((int)maxY) / BLOCK_HEIGHT, (int) dBuffer.heightB - 1);
+
+	int jStart = std::max(((int)minX) / 32, 0);
+	int jEnd = std::min(((int)maxX) / 32, (int) dBuffer.widthB - 1);
+	
+
+	for (int i = iStart; i <= iEnd ; i++) {
+		for (int j = jStart; j <= jEnd; j++) {
 			Block& b = dBuffer.getBlock(j, i);
 
 			for (int k = 0; k < BLOCK_HEIGHT; k++) {
@@ -380,6 +391,14 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 }
 
 void jank() {
+	//in 1600x1056
+	//rasterize takes about 40 seconds to render 4000
+	//rasterizeSilent takes about 0.4 seconds to render 4000
+
+	//in 1024x768
+	//rasterize takes about 18.5 seconds to render 4000
+	//rasterizeSilent takes about 0.189 seconds to render 4000
+
 	//rasterize(glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.3f));
 	//rasterize(glm::vec2(), glm::vec2(), glm::vec2());
 
@@ -388,7 +407,7 @@ void jank() {
 
 	std::cout << "Starting rasterize" << std::endl;
 	for (int i = 0; i < 4000; i++) {
-		rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9));
+		rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9)); //benchmark reference
 		//rasterizeSilent(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
 	}
 	//rasterize(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
