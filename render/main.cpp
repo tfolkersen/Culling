@@ -11,6 +11,8 @@
 #include <vector>
 #include <algorithm>
 
+
+
 bool triComp(glm::vec2 *p1, glm::vec2 *p2) {
 	return p1->y > p2->y;
 }
@@ -30,9 +32,50 @@ void printBits(uint32_t v) {
 	}
 }
 
+#define WIDTH 32
+#define HEIGHT 32
+#define BLOCK_HEIGHT 8
+
+//block is 32 width and 8 height
+struct Block {
+	uint32_t bits[BLOCK_HEIGHT];
+
+	void reset() {
+		for (int i = 0; i < BLOCK_HEIGHT; i++) {
+			bits[i] = 0;
+		}
+	}
+};
+
+struct DepthBuffer {
+	Block* arr;
+	uint32_t blockCount;
+
+	uint32_t widthB;
+	uint32_t heightB;
+
+	DepthBuffer() {
+		widthB = (WIDTH / 32);
+		heightB = (HEIGHT / BLOCK_HEIGHT);
+
+		blockCount = widthB * heightB;
+		std::cout << "DepthBuffer making " << blockCount << " blocks" << std::endl;
+		arr = new Block[blockCount];
+	}
+
+	~DepthBuffer() {
+		delete[] arr;
+	}
+
+	void print() {
+	}
+};
+
+DepthBuffer dBuffer;
+
 std::pair<int, int> convert(const glm::vec2 &v) {
-	int W = 31;
-	int H = 31;
+	int W = WIDTH - 1;
+	int H = HEIGHT - 1;
 	GLfloat Wf = (GLfloat)W;
 	GLfloat Hf = (GLfloat)H;
 	int x = round((Wf / 2.0) * v.x + (Wf / 2.0));
@@ -159,6 +202,9 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	printVec(f3);
 	std::cout << std::endl;
 
+
+
+	/*
 	for (int i = 0; i < 32; i++) {
 		std::pair<int, int> conv1 = convert(f1);
 		std::pair<int, int> conv2 = convert(f2);
@@ -177,6 +223,7 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 		f2.x -= s2 / 16.0;
 		f3.x -= s3 / 16.0;
 	}
+	*/
 }
 
 void jank() {
@@ -188,7 +235,6 @@ void jank() {
 	uint32_t result = line(4, 8, 9, 0, ~0, ~0);
 	printBits(result);
 	std::cout << std::endl;
-
 
 }
 
