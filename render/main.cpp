@@ -35,7 +35,9 @@ void printBits(uint32_t v) {
 
 #define WIDTH 32*50
 #define HEIGHT 32*33
-#define BLOCK_HEIGHT 32
+//#define WIDTH 32*50
+//#define HEIGHT 32*33
+#define BLOCK_HEIGHT 8
 
 //block is 32 width and 8 height
 struct Block {
@@ -109,6 +111,15 @@ std::pair<int, int> convert(const glm::vec2 &v) {
 	//int y = -(Hf / 2.0) * v.y + (Hf / 2.0);
 
 	return std::pair<int, int>(x, y);
+}
+
+void convertVec(glm::vec2 &v) {
+	int W = WIDTH - 1;
+	int H = HEIGHT - 1;
+	GLfloat Wf = (GLfloat)W;
+	GLfloat Hf = (GLfloat)H;
+	v.x = (Wf / 2.0) * v.x + (Wf / 2.0);
+	v.y = -(Hf / 2.0) * v.y + (Hf / 2.0);
 }
 
 uint32_t line(uint32_t e0, uint32_t e1, uint32_t e2, uint32_t o0, uint32_t o1, uint32_t o2) {
@@ -185,18 +196,34 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	uint32_t mask2 = o2 ? 0 : ~0;
 	uint32_t mask3 = o3 ? 0 : ~0;
 
-	GLfloat s1 = l1.x / l1.y;
-	GLfloat s2 = l2.x / l2.y;
-	GLfloat s3 = l3.x / l3.y;
-
-	GLfloat slopeFactor = (GLfloat)HEIGHT / 2;
-	s1 /= slopeFactor;
-	s2 /= slopeFactor;
-	s3 /= slopeFactor;
+//	GLfloat s1 = l1.x / l1.y;
+//	GLfloat s2 = l2.x / l2.y;
+//	GLfloat s3 = l3.x / l3.y;
+//
+//	GLfloat slopeFactor = (GLfloat)HEIGHT / 2;
+//	s1 /= slopeFactor;
+//	s2 /= slopeFactor;
+//	s3 /= slopeFactor;
 
 	glm::vec2 f1 = p1 + ((1.0f - p1.y) / l1.y) * l1;
 	glm::vec2 f2 = p1 + ((1.0f - p1.y) / l2.y) * l2;
 	glm::vec2 f3 = p2 + ((1.0f - p2.y) / l3.y) * l3;
+
+	convertVec(f1);
+	convertVec(f2);
+	convertVec(f3);
+	convertVec(p1);
+	convertVec(p2);
+	convertVec(p3);
+	l1 = p2 - p1;
+	l2 = p3 - p1;
+	l3 = p3 - p2;
+	GLfloat s1 = l1.x / l1.y;
+	GLfloat s2 = l2.x / l2.y;
+	GLfloat s3 = l3.x / l3.y;
+
+
+	//std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
 
 	for (int i = 0; i < dBuffer.heightB; i++) {
 		for (int j = 0; j < dBuffer.widthB; j++) {
@@ -204,17 +231,27 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 
 			for (int k = 0; k < BLOCK_HEIGHT; k++) {
 				int scanLine = i * BLOCK_HEIGHT + k;
-				std::pair<int, int> conv1 = convert(f1 - glm::vec2(1, 0) * (GLfloat) scanLine * s1);
-				std::pair<int, int> conv2 = convert(f2 - glm::vec2(1, 0) * (GLfloat) scanLine * s2);
-				std::pair<int, int> conv3 = convert(f3 - glm::vec2(1, 0) * (GLfloat) scanLine * s3);
+				//std::pair<int, int> conv1 = convert(f1 - glm::vec2(1, 0) * (GLfloat) scanLine * s1);
+				//std::pair<int, int> conv2 = convert(f2 - glm::vec2(1, 0) * (GLfloat) scanLine * s2);
+				//std::pair<int, int> conv3 = convert(f3 - glm::vec2(1, 0) * (GLfloat) scanLine * s3);
+				
+				GLfloat e1f = f1.x + (GLfloat)scanLine * s1;
+				GLfloat e2f = f2.x + (GLfloat)scanLine * s2;
+				GLfloat e3f = f3.x + (GLfloat)scanLine * s3;
 
 				//These lines are important
-				uint32_t e1 = std::max(0, conv1.first - j * 32);
-				uint32_t e2 = std::max(0, conv2.first - j * 32);
-				uint32_t e3 = std::max(0, conv3.first - j * 32);
+				uint32_t e1 = std::max(0.0f, e1f - j * 32.0f);
+				uint32_t e2 = std::max(0.0f, e2f - j * 32.0f);
+				uint32_t e3 = std::max(0.0f, e3f - j * 32.0f);
+
 
 				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
 				b.bits[k] = result;
+
+
+				//printBits(result);
+				//std::cout << "{ " << e1 << " " << e2 << " " << e3 << " s: " << scanLine << " }" << std::endl;
+
 
 			}
 		}
@@ -236,11 +273,11 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	ps.push_back(&t3);
 	std::sort(ps.begin(), ps.end(), triComp);
 
-	std::cout << "Sorted: ";
-	for (auto it = ps.begin(); it != ps.end(); it++) {
-		std::cout << (**it).y << " ";
-	}
-	std::cout << std::endl;
+	//std::cout << "Sorted: ";
+	//for (auto it = ps.begin(); it != ps.end(); it++) {
+	//	std::cout << (**it).y << " ";
+	//}
+	//std::cout << std::endl;
 
 	glm::vec2& p1 = *ps[0];
 	glm::vec2& p2 = *ps[1];
@@ -265,13 +302,13 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	uint32_t mask2 = o2 ? 0 : ~0;
 	uint32_t mask3 = o3 ? 0 : ~0;
 
-	printVec(p1);
-	std::cout << std::endl;
-	printVec(p2);
-	std::cout << std::endl;
-	printVec(p3);
-	std::cout << std::endl;
-	std::cout << o1 << " " << o2 << " " << o3 << std::endl;
+	//printVec(p1);
+	//std::cout << std::endl;
+	//printVec(p2);
+	//std::cout << std::endl;
+	//printVec(p3);
+	//std::cout << std::endl;
+	//std::cout << o1 << " " << o2 << " " << o3 << std::endl;
 
 	GLfloat s1 = l1.x / l1.y;
 	GLfloat s2 = l2.x / l2.y;
@@ -282,26 +319,26 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	s2 /= slopeFactor;
 	s3 /= slopeFactor;
 
-	std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
+	//std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
 
 	auto pair1 = convert(p1);
 	auto pair2 = convert(p2);
 	auto pair3 = convert(p3);
 
-	printPair(pair1);
-	std::cout << std::endl;
-	printPair(pair2);
-	std::cout << std::endl;
-	printPair(pair3);
-	std::cout << std::endl;
+	//printPair(pair1);
+	//std::cout << std::endl;
+	//printPair(pair2);
+	//std::cout << std::endl;
+	//printPair(pair3);
+	//std::cout << std::endl;
 
 	glm::vec2 f1 = p1 + ((1.0f - p1.y) / l1.y) * l1;
 	glm::vec2 f2 = p1 + ((1.0f - p1.y) / l2.y) * l2;
 	glm::vec2 f3 = p2 + ((1.0f - p2.y) / l3.y) * l3;
-	printVec(f1);
-	printVec(f2);
-	printVec(f3);
-	std::cout << std::endl;
+	//printVec(f1);
+	//printVec(f2);
+	//printVec(f3);
+	//std::cout << std::endl;
 
 
 	for (int i = 0; i < dBuffer.heightB; i++) {
@@ -320,6 +357,9 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 
 				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
 				b.bits[k] = result;
+
+				//printBits(result);
+				//std::cout << "{ " << e1 << " " << e2 << " " << e3 << " }" << std::endl;
 
 			}
 		}
@@ -353,13 +393,17 @@ void jank() {
 	//rasterize(glm::vec2(), glm::vec2(), glm::vec2());
 
 	dBuffer.reset();
+	clock_t start = clock();
 
 	std::cout << "Starting rasterize" << std::endl;
-	for (int i = 0; i < 400; i++) {
+	for (int i = 0; i < 4000; i++) {
 		rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9));
+		//rasterizeSilent(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
 	}
 	//rasterize(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
 	std::cout << "Done rasterize" << std::endl;
+	clock_t end = clock();
+	std::cout << "Time " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
 
 	//std::cout << "Printing buffer" << std::endl;
 	//dBuffer.print();
