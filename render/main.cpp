@@ -35,11 +35,11 @@ std::pair<int, int> convert(const glm::vec2 &v) {
 	int H = 31;
 	GLfloat Wf = (GLfloat)W;
 	GLfloat Hf = (GLfloat)H;
-	//int x = round((Wf / 2.0) * v.x + (Wf / 2.0));
-	//int y = round(-(Hf / 2.0) * v.y + (Hf / 2.0));
+	int x = round((Wf / 2.0) * v.x + (Wf / 2.0));
+	int y = round(-(Hf / 2.0) * v.y + (Hf / 2.0));
 
-	int x = (Wf / 2.0) * v.x + (Wf / 2.0);
-	int y = -(Hf / 2.0) * v.y + (Hf / 2.0);
+	//int x = (Wf / 2.0) * v.x + (Wf / 2.0);
+	//int y = -(Hf / 2.0) * v.y + (Hf / 2.0);
 
 	return std::pair<int, int>(x, y);
 }
@@ -62,7 +62,32 @@ uint32_t line(uint32_t e0, uint32_t e1, uint32_t e2, uint32_t o0, uint32_t o1, u
 }
 
 
+void fixTriangle(glm::vec2 &t1, glm::vec2 &t2, glm::vec2 &t3) {
+	GLfloat epsilon = 0.0001;
+	bool problem = true;
+
+	while (problem) {
+		problem = false;
+		if (t1.y == t2.y) {
+			problem = true;
+			t1.y += epsilon;
+		}
+
+		if (t1.y == t3.y) {
+			problem = true;
+			t3.y += epsilon * 0.9f;
+		}
+
+		if (t2.y == t3.y) {
+			problem = true;
+			t2.y += epsilon * 0.95f;
+		}
+	}
+}
+
 void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
+	fixTriangle(t1, t2, t3);
+
 	GLfloat cx = (t1.x + t2.x + t3.x) / 3.0f;
 	GLfloat cy = (t1.y + t2.y + t3.y) / 3.0f;
 	glm::vec2 center(cx, cy);
@@ -151,15 +176,14 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 		f1.x -= s1 / 16.0;
 		f2.x -= s2 / 16.0;
 		f3.x -= s3 / 16.0;
-
-
 	}
 }
 
 void jank() {
 	//rasterize(glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.3f));
 	//rasterize(glm::vec2(), glm::vec2(), glm::vec2());
-	rasterize(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9));
+	//rasterize(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9));
+	rasterize(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
 	std::cout << "Done rasterize" << std::endl;
 	uint32_t result = line(4, 8, 9, 0, ~0, ~0);
 	printBits(result);
