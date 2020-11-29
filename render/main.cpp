@@ -33,8 +33,8 @@ void printBits(uint32_t v) {
 	}
 }
 
-#define WIDTH 32*50
-#define HEIGHT 32*33
+#define WIDTH 32*32
+#define HEIGHT 32*24
 //#define WIDTH 32*50
 //#define HEIGHT 32*33
 #define BLOCK_HEIGHT 8
@@ -231,9 +231,6 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 
 			for (int k = 0; k < BLOCK_HEIGHT; k++) {
 				int scanLine = i * BLOCK_HEIGHT + k;
-				//std::pair<int, int> conv1 = convert(f1 - glm::vec2(1, 0) * (GLfloat) scanLine * s1);
-				//std::pair<int, int> conv2 = convert(f2 - glm::vec2(1, 0) * (GLfloat) scanLine * s2);
-				//std::pair<int, int> conv3 = convert(f3 - glm::vec2(1, 0) * (GLfloat) scanLine * s3);
 				
 				GLfloat e1f = f1.x + (GLfloat)scanLine * s1;
 				GLfloat e2f = f2.x + (GLfloat)scanLine * s2;
@@ -247,12 +244,6 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 
 				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
 				b.bits[k] = result;
-
-
-				//printBits(result);
-				//std::cout << "{ " << e1 << " " << e2 << " " << e3 << " s: " << scanLine << " }" << std::endl;
-
-
 			}
 		}
 	}
@@ -607,6 +598,7 @@ int main() {
 	return 0;
 }
 
+//https://www.codeproject.com/Articles/874396/Crunching-Numbers-with-AVX-and-AVX
 /*
 	__m256 evens = _mm256_set_ps(2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0);
 	__m256 odds = _mm256_set_ps(1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0);
