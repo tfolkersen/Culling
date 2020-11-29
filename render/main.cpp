@@ -237,21 +237,30 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	
 
 	for (int i = iStart; i <= iEnd ; i++) {
+		int scanBase = i * BLOCK_HEIGHT;
+
+		GLfloat e1f[BLOCK_HEIGHT];
+		GLfloat e2f[BLOCK_HEIGHT];
+		GLfloat e3f[BLOCK_HEIGHT];
+
+		e1f[0] = f1.x + (GLfloat)scanBase * s1;
+		e2f[0] = f2.x + (GLfloat)scanBase * s2;
+		e3f[0] = f3.x + (GLfloat)scanBase * s3;
+
+		for (int r = 1; r < BLOCK_HEIGHT; r++) {
+			e1f[r] = e1f[r - 1] + s1;
+			e2f[r] = e2f[r - 1] + s2;
+			e3f[r] = e3f[r - 1 ] + s3;
+		}
+
 		for (int j = jStart; j <= jEnd; j++) {
 			Block& b = dBuffer.getBlock(j, i);
 
 			for (int k = 0; k < BLOCK_HEIGHT; k++) {
-				int scanLine = i * BLOCK_HEIGHT + k;
-				
-				GLfloat e1f = f1.x + (GLfloat)scanLine * s1;
-				GLfloat e2f = f2.x + (GLfloat)scanLine * s2;
-				GLfloat e3f = f3.x + (GLfloat)scanLine * s3;
-
 				//These lines are important
-				uint32_t e1 = std::max(0.0f, e1f - j * 32.0f);
-				uint32_t e2 = std::max(0.0f, e2f - j * 32.0f);
-				uint32_t e3 = std::max(0.0f, e3f - j * 32.0f);
-
+				uint32_t e1 = std::max(0.0f, e1f[k] - j * 32.0f);
+				uint32_t e2 = std::max(0.0f, e2f[k] - j * 32.0f);
+				uint32_t e3 = std::max(0.0f, e3f[k] - j * 32.0f);
 
 				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
 				b.bits[k] = result;
@@ -390,14 +399,14 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	*/
 }
 
-void jank() {
+void jank() { //120-125x improvement
 	//in 1600x1056
 	//rasterize takes about 40 seconds to render 4000
-	//rasterizeSilent takes about 0.4 seconds to render 4000
+	//rasterizeSilent takes about 0.317 seconds to render 4000
 
 	//in 1024x768
 	//rasterize takes about 18.5 seconds to render 4000
-	//rasterizeSilent takes about 0.189 seconds to render 4000
+	//rasterizeSilent takes about 0.153 seconds to render 4000
 
 	//rasterize(glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.3f));
 	//rasterize(glm::vec2(), glm::vec2(), glm::vec2());
