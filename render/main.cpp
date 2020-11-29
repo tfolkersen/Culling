@@ -13,7 +13,7 @@
 
 
 
-bool triComp(glm::vec2 *p1, glm::vec2 *p2) {
+bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
 }
 
@@ -28,13 +28,14 @@ void printPair(std::pair<T, T>& p) {
 
 void printBits(uint32_t v) {
 	for (int i = 0; i < 32; i++) {
-		std::cout << ((v & (1 << (31 - i))) != 0) << " ";
+		//std::cout << ((v & (1 << (31 - i))) != 0) << " ";
+		std::cout << ((v & (1 << (31 - i))) != 0);
 	}
 }
 
-#define WIDTH 32
-#define HEIGHT 32
-#define BLOCK_HEIGHT 8
+#define WIDTH 32*50
+#define HEIGHT 32*33
+#define BLOCK_HEIGHT 32
 
 //block is 32 width and 8 height
 struct Block {
@@ -67,7 +68,30 @@ struct DepthBuffer {
 		delete[] arr;
 	}
 
+	void reset() {
+		for (int i = 0; i < heightB; i++) {
+			for (int j = 0; j < widthB; j++) {
+				Block& b = getBlock(j, i);
+				b.reset();
+			}
+		}
+	}
+
+	Block& getBlock(int x, int y) {
+		int index = y * widthB + x;
+		return arr[index];
+	}
+
 	void print() {
+		for (int i = 0; i < heightB; i++) {
+			for (int j = 0; j < BLOCK_HEIGHT; j++) {
+				for (int k = 0; k < widthB; k++) {
+					Block& b = getBlock(k, i);
+					printBits(b.bits[j]);
+				}
+				std::cout << std::endl;
+			}
+		}
 	}
 };
 
@@ -128,6 +152,77 @@ void fixTriangle(glm::vec2 &t1, glm::vec2 &t2, glm::vec2 &t3) {
 	}
 }
 
+void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
+	fixTriangle(t1, t2, t3);
+
+	GLfloat cx = (t1.x + t2.x + t3.x) / 3.0f;
+	GLfloat cy = (t1.y + t2.y + t3.y) / 3.0f;
+	glm::vec2 center(cx, cy);
+
+	std::vector<glm::vec2*> ps;
+	ps.push_back(&t1);
+	ps.push_back(&t2);
+	ps.push_back(&t3);
+	std::sort(ps.begin(), ps.end(), triComp);
+
+	glm::vec2& p1 = *ps[0];
+	glm::vec2& p2 = *ps[1];
+	glm::vec2& p3 = *ps[2];
+
+	glm::vec2 l1 = p2 - p1;
+	glm::vec2 l2 = p3 - p1;
+	glm::vec2 l3 = p3 - p2;
+
+	glm::vec2 n1(l1.y, -l1.x);
+	glm::vec2 n2(l2.y, -l2.x);
+	glm::vec2 n3(l3.y, -l3.x);
+
+	//true if left is outside
+	bool o1 = glm::dot(n1, (center - p1)) < 0;
+	bool o2 = glm::dot(n2, (center - p1)) < 0;
+	bool o3 = glm::dot(n3, (center - p2)) < 0;
+	uint32_t mask1 = o1 ? 0 : ~0;
+	uint32_t mask2 = o2 ? 0 : ~0;
+	uint32_t mask3 = o3 ? 0 : ~0;
+
+	GLfloat s1 = l1.x / l1.y;
+	GLfloat s2 = l2.x / l2.y;
+	GLfloat s3 = l3.x / l3.y;
+
+	GLfloat slopeFactor = (GLfloat)HEIGHT / 2;
+	s1 /= slopeFactor;
+	s2 /= slopeFactor;
+	s3 /= slopeFactor;
+
+	glm::vec2 f1 = p1 + ((1.0f - p1.y) / l1.y) * l1;
+	glm::vec2 f2 = p1 + ((1.0f - p1.y) / l2.y) * l2;
+	glm::vec2 f3 = p2 + ((1.0f - p2.y) / l3.y) * l3;
+
+	for (int i = 0; i < dBuffer.heightB; i++) {
+		for (int j = 0; j < dBuffer.widthB; j++) {
+			Block& b = dBuffer.getBlock(j, i);
+
+			for (int k = 0; k < BLOCK_HEIGHT; k++) {
+				int scanLine = i * BLOCK_HEIGHT + k;
+				std::pair<int, int> conv1 = convert(f1 - glm::vec2(1, 0) * (GLfloat) scanLine * s1);
+				std::pair<int, int> conv2 = convert(f2 - glm::vec2(1, 0) * (GLfloat) scanLine * s2);
+				std::pair<int, int> conv3 = convert(f3 - glm::vec2(1, 0) * (GLfloat) scanLine * s3);
+
+				//These lines are important
+				uint32_t e1 = std::max(0, conv1.first - j * 32);
+				uint32_t e2 = std::max(0, conv2.first - j * 32);
+				uint32_t e3 = std::max(0, conv3.first - j * 32);
+
+				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
+				b.bits[k] = result;
+
+			}
+		}
+	}
+}
+
+
+
 void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	fixTriangle(t1, t2, t3);
 
@@ -181,6 +276,12 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	GLfloat s1 = l1.x / l1.y;
 	GLfloat s2 = l2.x / l2.y;
 	GLfloat s3 = l3.x / l3.y;
+
+	GLfloat slopeFactor = (GLfloat)HEIGHT / 2;
+	s1 /= slopeFactor;
+	s2 /= slopeFactor;
+	s3 /= slopeFactor;
+
 	std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
 
 	auto pair1 = convert(p1);
@@ -202,6 +303,27 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	printVec(f3);
 	std::cout << std::endl;
 
+
+	for (int i = 0; i < dBuffer.heightB; i++) {
+		for (int j = 0; j < dBuffer.widthB; j++) {
+			Block& b = dBuffer.getBlock(j, i);
+
+			for (int k = 0; k < BLOCK_HEIGHT; k++) {
+				int scanLine = i * BLOCK_HEIGHT + k;
+				std::pair<int, int> conv1 = convert(f1 - glm::vec2(1, 0) * (GLfloat) scanLine * s1);
+				std::pair<int, int> conv2 = convert(f2 - glm::vec2(1, 0) * (GLfloat) scanLine * s2);
+				std::pair<int, int> conv3 = convert(f3 - glm::vec2(1, 0) * (GLfloat) scanLine * s3);
+
+				uint32_t e1 = std::max(0, conv1.first - j * 32);
+				uint32_t e2 = std::max(0, conv2.first - j * 32);
+				uint32_t e3 = std::max(0, conv3.first - j * 32);
+
+				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
+				b.bits[k] = result;
+
+			}
+		}
+	}
 
 
 	/*
@@ -229,13 +351,18 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 void jank() {
 	//rasterize(glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.3f));
 	//rasterize(glm::vec2(), glm::vec2(), glm::vec2());
-	//rasterize(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9));
-	rasterize(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
-	std::cout << "Done rasterize" << std::endl;
-	uint32_t result = line(4, 8, 9, 0, ~0, ~0);
-	printBits(result);
-	std::cout << std::endl;
 
+	dBuffer.reset();
+
+	std::cout << "Starting rasterize" << std::endl;
+	for (int i = 0; i < 400; i++) {
+		rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9));
+	}
+	//rasterize(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
+	std::cout << "Done rasterize" << std::endl;
+
+	//std::cout << "Printing buffer" << std::endl;
+	//dBuffer.print();
 }
 
 
