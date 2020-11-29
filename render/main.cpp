@@ -6,12 +6,29 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <common/shader.hpp>
 #include <ctime>
-//#include <immintrin.h>
+#include <immintrin.h>
 
 #include <vector>
 #include <algorithm>
 
+void meme() {
+	float a[8] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0 };
+	float b[8] = { 5.0, 4.0, 6.0, 2.0, 7.0, 2.0, 5.0, 9.0 };
+	float c[8];
 
+	__m256 va = _mm256_loadu_ps(a);
+	__m256 vb = _mm256_loadu_ps(b);
+	__m256 vc = _mm256_max_ps(va, vb);
+
+	_mm256_storeu_ps(c, vc);
+	for (int i = 0; i < 8; i++) {
+		std::cout << c[i] << " ";
+	}
+	std::cout << std::endl;
+
+
+
+}
 
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
@@ -33,10 +50,14 @@ void printBits(uint32_t v) {
 	}
 }
 
-#define WIDTH 32*32
-#define HEIGHT 32*24
-//#define WIDTH 32*50
-//#define HEIGHT 32*33
+//#define WIDTH 32*32
+//#define HEIGHT 32*24
+#define WIDTH 32*50
+#define HEIGHT 32*33
+
+//#define WIDTH 32*2
+//#define HEIGHT 32
+
 #define BLOCK_HEIGHT 8
 
 //block is 32 width and 8 height
@@ -222,7 +243,6 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	GLfloat s2 = l2.x / l2.y;
 	GLfloat s3 = l3.x / l3.y;
 
-
 	//std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
 	GLfloat minY = std::min(p1.y, std::min(p2.y, p3.y));
 	GLfloat maxY = std::max(p1.y, std::max(p2.y, p3.y));
@@ -235,23 +255,55 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	int jStart = std::max(((int)minX) / 32, 0);
 	int jEnd = std::min(((int)maxX) / 32, (int) dBuffer.widthB - 1);
 	
+	__m256 v_f1x = _mm256_set_ps(f1.x, f1.x, f1.x, f1.x, f1.x, f1.x, f1.x, f1.x);
+	__m256 v_f2x = _mm256_set_ps(f2.x, f2.x, f2.x, f2.x, f2.x, f2.x, f2.x, f2.x);
+	__m256 v_f3x = _mm256_set_ps(f3.x, f3.x, f3.x, f3.x, f3.x, f3.x, f3.x, f3.x);
+
+	__m256 v_s1 = _mm256_set_ps(s1, s1, s1, s1, s1, s1, s1, s1);
+	__m256 v_s2 = _mm256_set_ps(s2, s2, s2, s2, s2, s2, s2, s2);
+	__m256 v_s3 = _mm256_set_ps(s3, s3, s3, s3, s3, s3, s3, s3);
+
+	__m256 v_scanOffset = _mm256_set_ps(7.0f, 6.0f, 5.0f, 4.0f, 3.0f, 2.0f, 1.0f, 0.0f);
+
+	GLfloat e1f[BLOCK_HEIGHT];
+	GLfloat e2f[BLOCK_HEIGHT];
+	GLfloat e3f[BLOCK_HEIGHT];
 
 	for (int i = iStart; i <= iEnd ; i++) {
-		int scanBase = i * BLOCK_HEIGHT;
+		GLfloat scanBase = (GLfloat) i * BLOCK_HEIGHT;
 
-		GLfloat e1f[BLOCK_HEIGHT];
-		GLfloat e2f[BLOCK_HEIGHT];
-		GLfloat e3f[BLOCK_HEIGHT];
+		__m256 v_scanBase = _mm256_set_ps(scanBase, scanBase, scanBase, scanBase, scanBase, scanBase, scanBase, scanBase);
+		__m256 v_scanLine = _mm256_add_ps(v_scanBase, v_scanOffset);
 
-		e1f[0] = f1.x + (GLfloat)scanBase * s1;
-		e2f[0] = f2.x + (GLfloat)scanBase * s2;
-		e3f[0] = f3.x + (GLfloat)scanBase * s3;
+		__m256 v_e1f = v_f1x;
+		__m256 v_mul1 = _mm256_mul_ps(v_scanLine, v_s1);
+		v_e1f = _mm256_add_ps(v_e1f, v_mul1);
+		_mm256_storeu_ps(e1f, v_e1f);
 
-		for (int r = 1; r < BLOCK_HEIGHT; r++) {
-			e1f[r] = e1f[r - 1] + s1;
-			e2f[r] = e2f[r - 1] + s2;
-			e3f[r] = e3f[r - 1 ] + s3;
-		}
+
+		__m256 v_e2f = v_f2x;
+		__m256 v_mul2 = _mm256_mul_ps(v_scanLine, v_s2);
+		v_e2f = _mm256_add_ps(v_e2f, v_mul2);
+		_mm256_storeu_ps(e2f, v_e2f);
+
+		__m256 v_e3f = v_f3x;
+		__m256 v_mul3 = _mm256_mul_ps(v_scanLine, v_s3);
+		v_e3f = _mm256_add_ps(v_e3f, v_mul3);
+		_mm256_storeu_ps(e3f, v_e3f);
+
+		//GLfloat e1f[BLOCK_HEIGHT];
+		//GLfloat e2f[BLOCK_HEIGHT];
+		//GLfloat e3f[BLOCK_HEIGHT];
+
+		//e1f[0] = f1.x + (GLfloat)scanBase * s1;
+		//e2f[0] = f2.x + (GLfloat)scanBase * s2;
+		//e3f[0] = f3.x + (GLfloat)scanBase * s3;
+
+		//for (int r = 1; r < BLOCK_HEIGHT; r++) {
+		//	e1f[r] = e1f[r - 1] + s1;
+		//	e2f[r] = e2f[r - 1] + s2;
+		//	e3f[r] = e3f[r - 1 ] + s3;
+		//}
 
 		for (int j = jStart; j <= jEnd; j++) {
 			Block& b = dBuffer.getBlock(j, i);
@@ -400,6 +452,9 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 }
 
 void jank() { //120-125x improvement
+	//meme();
+	//exit(0);
+
 	//in 1600x1056
 	//rasterize takes about 40 seconds to render 4000
 	//rasterizeSilent takes about 0.317 seconds to render 4000
@@ -415,7 +470,7 @@ void jank() { //120-125x improvement
 	clock_t start = clock();
 
 	std::cout << "Starting rasterize" << std::endl;
-	for (int i = 0; i < 4000; i++) {
+	for (int i = 0; i < 1; i++) {
 		rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9)); //benchmark reference
 		//rasterizeSilent(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
 	}
@@ -425,7 +480,7 @@ void jank() { //120-125x improvement
 	std::cout << "Time " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
 
 	//std::cout << "Printing buffer" << std::endl;
-	//dBuffer.print();
+	dBuffer.print();
 }
 
 
