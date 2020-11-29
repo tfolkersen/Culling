@@ -6,7 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <common/shader.hpp>
 #include <ctime>
-#include <immintrin.h>
+//#include <immintrin.h>
 
 #include <vector>
 #include <algorithm>
@@ -24,29 +24,43 @@ void printPair(std::pair<T, T>& p) {
 	std::cout << "<" << p.first << " " << p.second << ">";
 }
 
+void printBits(uint32_t v) {
+	for (int i = 0; i < 32; i++) {
+		std::cout << ((v & (1 << (31 - i))) != 0) << " ";
+	}
+}
 
-std::pair<int, int> convert(glm::vec2 &v) {
+std::pair<int, int> convert(const glm::vec2 &v) {
 	int W = 31;
 	int H = 31;
 	GLfloat Wf = (GLfloat)W;
 	GLfloat Hf = (GLfloat)H;
-	int x = round((Wf / 2.0) * v.x + (Wf / 2.0));
-	int y = round(-(Hf / 2.0) * v.y + (Hf / 2.0));
+	//int x = round((Wf / 2.0) * v.x + (Wf / 2.0));
+	//int y = round(-(Hf / 2.0) * v.y + (Hf / 2.0));
+
+	int x = (Wf / 2.0) * v.x + (Wf / 2.0);
+	int y = -(Hf / 2.0) * v.y + (Hf / 2.0);
+
 	return std::pair<int, int>(x, y);
 }
 
 uint32_t line(uint32_t e0, uint32_t e1, uint32_t e2, uint32_t o0, uint32_t o1, uint32_t o2) {
-	uint32_t m0 = (((uint32_t)~0) >> e0) ^ o0;
-	uint32_t m1 = (((uint32_t)~0) >> e1) ^ o1;
-	uint32_t m2 = (((uint32_t)~0) >> e2) ^ o2;
+	uint32_t m0 = ~0;
+	m0 = e0 >= 32 ? 0 : (m0 >> e0);
+	m0 ^= o0;
+
+	uint32_t m1 = ~0;
+	m1 = e1 >= 32 ? 0 : (m1 >> e1);
+	m1 ^= o1;
+
+	uint32_t m2 = ~0;
+	m2 = e2 >= 32 ? 0 : (m2 >> e2);
+	m2 ^= o2;
+
+
 	return m0 & m1 & m2;
 }
 
-void printBits(uint32_t v) {
-	for (int i = 0; i < 32; i++) {
-		std::cout << ((v >> i) & 1) << " ";
-	}
-}
 
 void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	GLfloat cx = (t1.x + t2.x + t3.x) / 3.0f;
@@ -124,15 +138,20 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 		std::pair<int, int> conv1 = convert(f1);
 		std::pair<int, int> conv2 = convert(f2);
 		std::pair<int, int> conv3 = convert(f3);
+		uint32_t e1 = std::max(0, conv1.first);
+		uint32_t e2 = std::max(0, conv2.first);
+		uint32_t e3 = std::max(0, conv3.first);
 
-		uint32_t result = line((uint32_t) std::max(0, conv1.first), (uint32_t) std::max(0, conv2.first), (uint32_t) std::max(0, conv3.first), mask1, mask2, mask3);
-		//std::cout << "{" << conv1.first << " " << conv2.first << " " << conv3.first << "} ";
-		//std::cout << f1.x << " - " << f2.x << " - " << f3.x << std::endl;
+		uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
+		printBits(result);
+		std::cout << "{" << conv1.first << " " << conv2.first << " " << conv3.first << "} ";
+		std::cout << f1.x << " - " << f2.x << " - " << f3.x;
+		std::cout << std::endl;
+
 		f1.x -= s1 / 16.0;
 		f2.x -= s2 / 16.0;
 		f3.x -= s3 / 16.0;
-		printBits(result);
-		std::cout << std::endl;
+
 
 	}
 }
@@ -141,6 +160,11 @@ void jank() {
 	//rasterize(glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.3f));
 	//rasterize(glm::vec2(), glm::vec2(), glm::vec2());
 	rasterize(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9));
+	std::cout << "Done rasterize" << std::endl;
+	uint32_t result = line(4, 8, 9, 0, ~0, ~0);
+	printBits(result);
+	std::cout << std::endl;
+
 
 }
 
