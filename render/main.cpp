@@ -52,8 +52,11 @@ void printBits(uint32_t v) {
 
 //#define WIDTH 32*32
 //#define HEIGHT 32*24
-#define WIDTH 32*50
-#define HEIGHT 32*33
+//#define WIDTH 32*50
+//#define HEIGHT 32*33
+
+#define WIDTH 32*20
+#define HEIGHT 32*15
 
 //#define WIDTH 32*2
 //#define HEIGHT 32
@@ -470,7 +473,7 @@ void jank() { //120-125x improvement
 	clock_t start = clock();
 
 	std::cout << "Starting rasterize" << std::endl;
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < 4000; i++) {
 		rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9)); //benchmark reference
 		//rasterizeSilent(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
 	}
@@ -480,7 +483,7 @@ void jank() { //120-125x improvement
 	std::cout << "Time " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
 
 	//std::cout << "Printing buffer" << std::endl;
-	dBuffer.print();
+	//dBuffer.print();
 }
 
 
