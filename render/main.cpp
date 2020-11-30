@@ -73,19 +73,22 @@ void printBits(uint32_t v) {
 }
 
 //1024x768
-//#define WIDTH 32*32
-//#define HEIGHT 32*24
+//#define BUFFER_WIDTH 32*32
+//#define BUFFER_HEIGHT 32*24
 
 //1600x1056
-//#define WIDTH 32*50
-//#define HEIGHT 32*33
+//#define BUFFER_WIDTH 32*50
+//#define BUFFER_HEIGHT 32*33
 
 //640x480
-#define WIDTH 32*20
-#define HEIGHT 32*15
+#define BUFFER_WIDTH 32*20
+#define BUFFER_HEIGHT 32*15
 
-//#define WIDTH 32
-//#define HEIGHT 8
+//#define BUFFER_WIDTH 32
+//#define BUFFER_HEIGHT 8
+
+#define SCREEN_WIDTH 1024
+#define SCREEN_HEIGHT 768
 
 struct Model {
 	GLuint varr;
@@ -121,8 +124,8 @@ struct DepthBuffer {
 	uint32_t heightB;
 
 	DepthBuffer() {
-		widthB = (WIDTH / 32);
-		heightB = (HEIGHT / BLOCK_HEIGHT);
+		widthB = (BUFFER_WIDTH / 32);
+		heightB = (BUFFER_HEIGHT / BLOCK_HEIGHT);
 
 		blockCount = widthB * heightB;
 		std::cout << "DepthBuffer making " << blockCount << " blocks" << std::endl;
@@ -302,8 +305,8 @@ Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b) {
 
 
 std::pair<int, int> convert(const glm::vec2 &v) {
-	int W = WIDTH - 1;
-	int H = HEIGHT - 1;
+	int W = BUFFER_WIDTH - 1;
+	int H = BUFFER_HEIGHT - 1;
 	GLfloat Wf = (GLfloat)W;
 	GLfloat Hf = (GLfloat)H;
 	int x = round((Wf / 2.0) * v.x + (Wf / 2.0));
@@ -316,8 +319,8 @@ std::pair<int, int> convert(const glm::vec2 &v) {
 }
 
 void convertVec(glm::vec2 &v) {
-	int W = WIDTH - 1;
-	int H = HEIGHT - 1;
+	int W = BUFFER_WIDTH - 1;
+	int H = BUFFER_HEIGHT - 1;
 	GLfloat Wf = (GLfloat)W;
 	GLfloat Hf = (GLfloat)H;
 	v.x = (Wf / 2.0) * v.x + (Wf / 2.0);
@@ -668,7 +671,7 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	GLfloat s2 = l2.x / l2.y;
 	GLfloat s3 = l3.x / l3.y;
 
-	GLfloat slopeFactor = (GLfloat)HEIGHT / 2;
+	GLfloat slopeFactor = (GLfloat)BUFFER_HEIGHT / 2;
 	s1 /= slopeFactor;
 	s2 /= slopeFactor;
 	s3 /= slopeFactor;
@@ -895,7 +898,7 @@ void init() {
 	std::cout << u_LightPos << " " << u_LightColor << " " << u_AmbientLight << " " << u_MvpMat << " " << u_ModelMat << " " << u_NormalMat << std::endl;
 
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	project = glm::perspective(glm::radians(90.0f), 1024.0f / 768.0f, 0.01f, 100.0f);
+	project = glm::perspective(glm::radians(90.0f), (GLfloat) SCREEN_WIDTH / (GLfloat) SCREEN_HEIGHT, 0.01f, 100.0f);
 
 	makeModels();
 }
@@ -999,8 +1002,8 @@ void handleInput() {
 }
 
 void cursorCallback(GLFWwindow* window, double xPos, double yPos) {
-	double dx = xPos - (1024.0 / 2.0);
-	double dy = yPos - (768.0 / 2.0);
+	double dx = xPos - (SCREEN_WIDTH / 2.0);
+	double dy = yPos - (SCREEN_HEIGHT / 2.0);
 
 	yaw += MOUSE_SENSITIVITY * dx;
 	pitch += MOUSE_SENSITIVITY * dy;
@@ -1021,7 +1024,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(1024, 768, "asd", NULL, NULL);
+	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "asd", NULL, NULL);
 
 	if (window == NULL) {
 		std::cerr << "Failed to make glfw window" << std::endl;
@@ -1062,7 +1065,7 @@ int main() {
 
 		glfwPollEvents();
 		handleInput();
-		glfwSetCursorPos(window, 1024 / 2.0, 768 / 2.0);
+		glfwSetCursorPos(window, SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0);
 		clock_t end = clock();
 
 		double elapsed = (end - start) / (double)CLOCKS_PER_SEC;
