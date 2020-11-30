@@ -1,5 +1,11 @@
 #include <iostream>
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -20,6 +26,7 @@
 #define KEY_RIGHT GLFW_KEY_D
 #define KEY_UP GLFW_KEY_SPACE
 #define KEY_DOWN GLFW_KEY_LEFT_SHIFT
+#define FPS 1
 
 #define KEY_R_UP GLFW_KEY_UP
 #define KEY_R_DOWN GLFW_KEY_DOWN
@@ -28,10 +35,10 @@
 
 #define PI 3.141592654
 
-GLfloat cameraSpeed = 0.1f;
+GLfloat cameraSpeed = 0.05f;
 GLfloat rotationSpeed = 0.025;
 
-#define MOUSE_SENSITIVITY 0.001 / 1.2
+#define MOUSE_SENSITIVITY 0.001 / 1.6
 
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
@@ -44,6 +51,18 @@ void printVec(glm::vec2& v) {
 template<class T>
 void printPair(std::pair<T, T>& p) {
 	std::cout << "<" << p.first << " " << p.second << ">";
+}
+
+void fpsWait(double seconds) {
+	std::cout << "waiting " << seconds << std::endl;
+	if (seconds < 0) {
+		return;
+	}
+	#if defined(WIN32) || defined (_WIN32) || defined(__WIN32)
+	Sleep(seconds / 1000.0);
+	#else
+	usleep(seconds * 1000000.0);
+	#endif
 }
 
 void printBits(uint32_t v) {
@@ -78,6 +97,7 @@ struct Model {
 
 Model box;
 Model plant;
+Model cube;
 
 
 #define BLOCK_HEIGHT 8
@@ -179,7 +199,7 @@ std::vector<std::string> split(std::string str, std::string del) {
 	return list;
 }
 
-Model parseObj(std::string fileName) {
+Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b) {
 	std::string line;
 	std::vector<std::string> tokens;
 	std::vector<std::vector<std::string>> subtokens;
@@ -250,9 +270,9 @@ Model parseObj(std::string fileName) {
 					normalData.push_back(normals[vni * 3 + 0]);
 					normalData.push_back(normals[vni * 3 + 1]);
 					normalData.push_back(normals[vni * 3 + 2]);
-					colorData.push_back(0.5f);
-					colorData.push_back(0.5f);
-					colorData.push_back(0.0f);
+					colorData.push_back(r);
+					colorData.push_back(g);
+					colorData.push_back(b);
 				}
 			}
 		}
@@ -821,26 +841,26 @@ void makeModels() {
 	glGenBuffers(1, &box.posBuff);
 	glBindBuffer(GL_ARRAY_BUFFER, box.posBuff);
 	const static GLfloat boxPos[] = {
-	-1.0f, 0.0f, 0.0f, //1
+	1.0f, 1.0f, 0.0f, //9
 	-1.0f, 1.0f, 0.0f, //7
-	1.0f, 1.0f, 0.0f, //9
+	-1.0f, 0.0f, 0.0f, //1
 
-	1.0f, 1.0f, 0.0f, //9
+	-1.0f, 0.0f, 0.0f, //1
 	1.0f, 0.0f, 0.0f, //3
-	-1.0f, 0.0f, 0.0f //1
+	1.0f, 1.0f, 0.0f //9
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boxPos), boxPos, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &box.colBuff);
 	glBindBuffer(GL_ARRAY_BUFFER, box.colBuff);
 	const static GLfloat boxCol[] = {
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, //9
+		0.0f, 1.0f, 0.0f, //7
+		1.0f, 0.0f, 0.0f, //1
 
-		0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f
+		1.0f, 0.0f, 0.0f, //1
+		1.0f, 0.0f, 1.0f, //3
+		0.0f, 0.0f, 1.0f //9
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boxCol), boxCol, GL_STATIC_DRAW);
 
@@ -858,8 +878,8 @@ void makeModels() {
 
 	box.nVerts = 6;
 
-	plant = parseObj("models/banana_plant.obj");
-
+	plant = parseObj("models/banana_plant.obj", 0.3f, 1.0f, 0.0f);
+	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
 }
 
 void init() {
@@ -882,6 +902,7 @@ void init() {
 
 void render() {
 	double seconds = clock() / (double)CLOCKS_PER_SEC;
+	lightPos = glm::vec3(4.0f * cos(seconds), 0.0f, 4.0f * sin(seconds));
 
 	glClearColor(0.3f, 0.3f, 0.3f, 0.5f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -903,6 +924,12 @@ void render() {
 	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	mvp = project * view * model;
 	drawModel(plant);
+
+	model = glm::mat4();
+	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+	mvp = project * view * model;
+	drawModel(cube);
 }
 
 bool keyPressed(int key) {
@@ -980,6 +1007,7 @@ void cursorCallback(GLFWwindow* window, double xPos, double yPos) {
 
 }
 
+
 int main() {
 	jank();
 	if (glfwInit() != GL_TRUE) {
@@ -1019,18 +1047,26 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	glfwSetCursorPosCallback(window, cursorCallback);
 
 	init();
 
 
 	do {
+		clock_t start = clock();
 		render();
 		glfwSwapBuffers(window);
 
 		glfwPollEvents();
 		handleInput();
 		glfwSetCursorPos(window, 1024 / 2.0, 768 / 2.0);
+		clock_t end = clock();
+
+		double elapsed = (end - start) / (double)CLOCKS_PER_SEC;
+		//fpsWait(1 / (double)FPS - elapsed);
 	} while (!glfwWindowShouldClose(window));
 
 	return 0;
