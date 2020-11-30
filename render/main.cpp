@@ -34,16 +34,20 @@ void printBits(uint32_t v) {
 	}
 }
 
+//1024x768
 //#define WIDTH 32*32
 //#define HEIGHT 32*24
+
+//1600x1056
 //#define WIDTH 32*50
 //#define HEIGHT 32*33
 
+//640x480
 #define WIDTH 32*20
 #define HEIGHT 32*15
 
-//#define WIDTH 32*2
-//#define HEIGHT 32
+//#define WIDTH 32
+//#define HEIGHT 8
 
 struct Model {
 	GLuint varr;
