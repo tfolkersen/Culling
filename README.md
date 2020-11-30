@@ -8,3 +8,8 @@ http://www.opengl-tutorial.org/beginners-tutorials/tutorial-1-opening-a-window/
 
 Forked from
 https://github.com/opengl-tutorials/ogl
+
+Models used:
+plant model
+https://www.cgtrader.com/free-3d-models/plant/pot-plant/banana-plant-3d-model
+by user "yesid316"

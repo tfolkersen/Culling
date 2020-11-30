@@ -10,27 +10,9 @@
 
 #include <vector>
 #include <algorithm>
-
-/*
-void meme() {
-	float a[8] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0 };
-	float b[8] = { 5.0, 4.0, 6.0, 2.0, 7.0, 2.0, 5.0, 9.0 };
-	float c[8];
-
-	__m256 va = _mm256_loadu_ps(a);
-	__m256 vb = _mm256_loadu_ps(b);
-	__m256 vc = _mm256_max_ps(va, vb);
-
-	_mm256_storeu_ps(c, vc);
-	for (int i = 0; i < 8; i++) {
-		std::cout << c[i] << " ";
-	}
-	std::cout << std::endl;
-
-
-
-}
-*/
+#include <fstream>
+#include <sstream>
+#include <string>
 
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
@@ -62,6 +44,18 @@ void printBits(uint32_t v) {
 
 //#define WIDTH 32*2
 //#define HEIGHT 32
+
+struct Model {
+	GLuint varr;
+	GLuint posBuff;
+	GLuint colBuff;
+	GLuint normBuff;
+	int nVerts;
+};
+
+Model box;
+Model plant;
+
 
 #define BLOCK_HEIGHT 8
 
@@ -124,6 +118,145 @@ struct DepthBuffer {
 };
 
 DepthBuffer dBuffer;
+
+template <class T>
+std::ostream& operator<<(std::ostream &os, const std::vector<T> &v) {
+	os << "<";
+	for (auto it = v.begin();;) {
+		os << *it;
+		if (++it == v.end()) {
+			break;
+		}
+		os << " ";
+	}
+	os << ">";
+	return os;
+}
+
+std::vector<std::string> split(std::string str, std::string del) {
+	std::vector<std::string> list;
+
+	size_t i = str.find(del);
+	while (i != -1 && str.length() != 0) {
+		std::string left = str.substr(0, i);
+		if (left.length() != 0) {
+			list.push_back(left);
+		}
+		if (i == str.length() - 1) {
+			str = "";
+			break;
+		}
+		str = str.substr(i + 1);
+		i = str.find(del);
+	}
+	if (str.length() != 0) {
+		list.push_back(str);
+	}
+
+	return list;
+}
+
+Model parseObj(std::string fileName) {
+	std::string line;
+	std::vector<std::string> tokens;
+	std::vector<std::vector<std::string>> subtokens;
+
+	std::vector<GLfloat> vertices;
+	std::vector<GLfloat> normals;
+
+	std::vector<GLfloat> posData;
+	std::vector<GLfloat> normalData;
+	std::vector<GLfloat> colorData;
+
+	std::fstream f(fileName);
+	while (std::getline(f, line)) {
+		tokens = split(line, " ");
+		if (tokens.empty()) {
+			continue;
+		}
+
+		if (tokens[0] == "v") {
+			GLfloat x = std::stof(tokens[1]);
+			GLfloat y = std::stof(tokens[2]);
+			GLfloat z = std::stof(tokens[3]);
+			vertices.push_back(x);
+			vertices.push_back(y);
+			vertices.push_back(z);
+		} else if (tokens[0] == "vn") {
+			GLfloat x = std::stof(tokens[1]);
+			GLfloat y = std::stof(tokens[2]);
+			GLfloat z = std::stof(tokens[3]);
+			normals.push_back(x);
+			normals.push_back(y);
+			normals.push_back(z);
+		}
+	}
+	f.close();
+
+
+	f = std::fstream(fileName);
+	while (std::getline(f, line)) {
+		tokens = split(line, " ");
+		if (tokens.empty()) {
+			continue;
+		}
+
+		if (tokens[0] == "f") {
+			subtokens.clear();
+
+			for (size_t j = 1; j < tokens.size(); j++) {
+				subtokens.push_back(split(tokens[j], "/"));
+			}
+
+			for (size_t j = 0; j < subtokens.size() - 2; j++) {
+				for (size_t k = 0; k < 3; k++) {
+					int vi;
+					int vni;
+
+					if (k == 0) {
+						vi = std::stoi(subtokens[0][0]) - 1;
+						vni = std::stoi(subtokens[0][2]) - 1;
+					} else {
+						vi = std::stoi(subtokens[j + k][0]) - 1;
+						vni = std::stoi(subtokens[j + k][2]) - 1;
+					}
+
+					posData.push_back(vertices[vi * 3 + 0]);
+					posData.push_back(vertices[vi * 3 + 1]);
+					posData.push_back(vertices[vi * 3 + 2]);
+					normalData.push_back(normals[vni * 3 + 0]);
+					normalData.push_back(normals[vni * 3 + 1]);
+					normalData.push_back(normals[vni * 3 + 2]);
+					colorData.push_back(0.5f);
+					colorData.push_back(0.5f);
+					colorData.push_back(0.0f);
+				}
+			}
+		}
+	}
+	f.close();
+
+	Model m;
+	glGenVertexArrays(1, &m.varr);
+	glBindVertexArray(m.varr);
+
+	glGenBuffers(1, &m.posBuff);
+	glBindBuffer(GL_ARRAY_BUFFER, m.posBuff);
+	glBufferData(GL_ARRAY_BUFFER, posData.size() * sizeof(GLfloat), posData.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &m.colBuff);
+	glBindBuffer(GL_ARRAY_BUFFER, m.colBuff);
+	glBufferData(GL_ARRAY_BUFFER, colorData.size() * sizeof(GLfloat), colorData.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &m.normBuff);
+	glBindBuffer(GL_ARRAY_BUFFER, m.normBuff);
+	glBufferData(GL_ARRAY_BUFFER, normalData.size() * sizeof(GLfloat), normalData.data(), GL_STATIC_DRAW);
+
+	m.nVerts = posData.size() / 3;
+	return m;
+
+}
+
 
 std::pair<int, int> convert(const glm::vec2 &v) {
 	int W = WIDTH - 1;
@@ -567,6 +700,7 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 }
 
 void jank() { //120-125x improvement
+	return;
 	//meme();
 	//exit(0);
 
@@ -585,7 +719,7 @@ void jank() { //120-125x improvement
 	clock_t start = clock();
 
 	std::cout << "Starting rasterize" << std::endl;
-	for (int i = 0; i < 4000; i++) {
+	for (int i = 0; i < 1; i++) {
 		rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9)); //benchmark reference
 		//rasterizeSilent(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
 	}
@@ -629,15 +763,6 @@ void setLights() {
 	glUniform3f(u_AmbientLight, ambientLight[0], ambientLight[1], ambientLight[2]);
 }
 
-struct Model {
-	GLuint varr;
-	GLuint posBuff;
-	GLuint colBuff;
-	GLuint normBuff;
-	int nVerts;
-};
-
-Model box;
 
 void drawModel(Model &m) {
 	glBindVertexArray(m.varr);
@@ -662,7 +787,6 @@ void drawModel(Model &m) {
 void makeModels() {
 	glGenVertexArrays(1, &box.varr);
 	glBindVertexArray(box.varr);
-
 
 	glGenBuffers(1, &box.posBuff);
 	glBindBuffer(GL_ARRAY_BUFFER, box.posBuff);
@@ -703,6 +827,9 @@ void makeModels() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boxNorm), boxNorm, GL_STATIC_DRAW);
 
 	box.nVerts = 6;
+
+	plant = parseObj("models/banana_plant.obj");
+
 }
 
 void init() {
@@ -721,26 +848,30 @@ void init() {
 }
 
 void render() {
+	double seconds = clock() / (double)CLOCKS_PER_SEC;
+
 	glClearColor(0.3f, 0.3f, 0.3f, 0.5f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	setLights();
 
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	project = glm::perspective(glm::radians(45.0f), 1024.0f / 768.0f, 0.01f, 100.0f);
 
+	GLfloat rad = seconds / 1.0f;
 
-	time_t t = time(NULL);
-	GLfloat rad = ((GLfloat)t) / 1.0;
-	model = glm::rotate(model, 0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(glm::mat4(), rad, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	mvp = project * view * model;
 	drawModel(box);
 
-
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 1.0f));
+	model = glm::rotate(model, rad, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+	mvp = project * view * model;
+	drawModel(plant);
 }
-
-
 
 int main() {
 	jank();
@@ -777,6 +908,8 @@ int main() {
 	programID = LoadShaders("v.glsl", "f.glsl");
 	glUseProgram(programID);
 
+	glEnable(GL_DEPTH_TEST);
+
 	init();
 
 	do {
@@ -796,15 +929,3 @@ int main() {
 	return 0;
 }
 
-//https://www.codeproject.com/Articles/874396/Crunching-Numbers-with-AVX-and-AVX
-/*
-	__m256 evens = _mm256_set_ps(2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0);
-	__m256 odds = _mm256_set_ps(1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0);
-	__m256 result = _mm256_add_ps(evens, odds);
-	for (int i = 7; i >= 0; i--) {
-		std::cout << ((float*)&result)[i] << " ";
-	}
-	std::cout << std::endl;
-
-
-*/
