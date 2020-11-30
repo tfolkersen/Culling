@@ -14,6 +14,24 @@
 #include <sstream>
 #include <string>
 
+#define KEY_FORWARD GLFW_KEY_W
+#define KEY_LEFT GLFW_KEY_A
+#define KEY_BACK GLFW_KEY_S
+#define KEY_RIGHT GLFW_KEY_D
+#define KEY_UP GLFW_KEY_SPACE
+#define KEY_DOWN GLFW_KEY_LEFT_SHIFT
+
+#define KEY_R_UP GLFW_KEY_UP
+#define KEY_R_DOWN GLFW_KEY_DOWN
+#define KEY_R_LEFT GLFW_KEY_LEFT
+#define KEY_R_RIGHT GLFW_KEY_RIGHT
+
+
+#define PI 3.141592654
+
+GLfloat cameraSpeed = 0.1f;
+GLfloat rotationSpeed = 0.025;
+
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
 }
@@ -752,6 +770,13 @@ glm::mat4 normal;
 glm::mat4 view;
 glm::mat4 project;
 
+GLfloat yaw = 0.0f;
+GLfloat pitch = 0.0f;
+GLfloat oldYaw = yaw;
+GLfloat oldPitch = pitch;
+
+
+
 void setMatrices() {
 	glUniformMatrix4fv(u_MvpMat, 1, GL_FALSE, &mvp[0][0]);
 	glUniformMatrix4fv(u_ModelMat, 1, GL_FALSE, &model[0][0]);
@@ -848,6 +873,9 @@ void init() {
 	std::cout << "Locations ";
 	std::cout << u_LightPos << " " << u_LightColor << " " << u_AmbientLight << " " << u_MvpMat << " " << u_ModelMat << " " << u_NormalMat << std::endl;
 
+	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	project = glm::perspective(glm::radians(45.0f), 1024.0f / 768.0f, 0.01f, 100.0f);
+
 	makeModels();
 }
 
@@ -859,10 +887,9 @@ void render() {
 
 	setLights();
 
-	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	project = glm::perspective(glm::radians(45.0f), 1024.0f / 768.0f, 0.01f, 100.0f);
 
 	GLfloat rad = seconds / 1.0f;
+	rad = 0.0f;
 
 	model = glm::rotate(glm::mat4(), rad, glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -875,6 +902,69 @@ void render() {
 	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	mvp = project * view * model;
 	drawModel(plant);
+}
+
+bool keyPressed(int key) {
+	return glfwGetKey(window, key) == GLFW_PRESS;
+}
+
+void handleInput() {
+	if (keyPressed(GLFW_KEY_ESCAPE)) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	if (keyPressed(KEY_LEFT)) {
+		view = glm::translate(glm::mat4(), glm::vec3(1.0f, 0.0f, 0.0f) * cameraSpeed) * view;
+	}
+
+	if (keyPressed(KEY_RIGHT)) {
+		view = glm::translate(glm::mat4(), glm::vec3(-1.0f, 0.0f, 0.0f) * cameraSpeed) * view;
+	}
+
+	if (keyPressed(KEY_FORWARD)) {
+		view = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 1.0f) * cameraSpeed) * view;
+	}
+
+	if (keyPressed(KEY_BACK)) {
+		view = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.0f) * cameraSpeed) * view;
+	}
+
+	if (keyPressed(KEY_R_LEFT)) {
+		yaw -= rotationSpeed;
+	}
+
+	if (keyPressed(KEY_R_RIGHT)) {
+		yaw += rotationSpeed;
+	}
+
+	if (keyPressed(KEY_R_UP)) {
+		pitch -= rotationSpeed;
+	}
+
+	if (keyPressed(KEY_R_DOWN)) {
+		pitch += rotationSpeed;
+	}
+
+	view = glm::rotate(glm::mat4(), -oldYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldPitch, glm::vec3(1.0f, 0.0f, 0.0f)) * view;
+
+	if (keyPressed(KEY_UP)) {
+		view = glm::translate(glm::mat4(), glm::vec3(0.0f, -1.0f, 0.0f) * cameraSpeed) * view;
+	}
+
+	if (keyPressed(KEY_DOWN)) {
+		view = glm::translate(glm::mat4(), glm::vec3(0.0f, 1.0f, 0.0f) * cameraSpeed) * view;
+	}
+
+
+	view = glm::rotate(glm::mat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) * view;
+
+	//view = glm::rotate(glm::mat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * view;
+	//view = glm::rotate(glm::mat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldPitch, glm::vec3(1.0f, 0.0f, 0.0f)) * view;
+	//view = glm::rotate(glm::mat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldPitch, glm::vec3(1.0f, 0.0f, 0.0f)) * view;
+
+	oldYaw = yaw;
+	oldPitch = pitch;
+	pitch = std::min(((float) PI) / 2.0f, std::max(-((float) PI) / 2.0f, pitch));
 }
 
 int main() {
@@ -908,27 +998,25 @@ int main() {
 	}
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	programID = LoadShaders("v.glsl", "f.glsl");
 	glUseProgram(programID);
 
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
 	init();
+
 
 	do {
 		render();
 		glfwSwapBuffers(window);
 
 		glfwPollEvents();
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-
-
+		handleInput();
+		glfwSetCursorPos(window, 1024 / 2.0, 768 / 2.0);
 	} while (!glfwWindowShouldClose(window));
-
-
 
 	return 0;
 }
