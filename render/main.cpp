@@ -26,11 +26,12 @@
 #define KEY_R_LEFT GLFW_KEY_LEFT
 #define KEY_R_RIGHT GLFW_KEY_RIGHT
 
-
 #define PI 3.141592654
 
 GLfloat cameraSpeed = 0.1f;
 GLfloat rotationSpeed = 0.025;
+
+#define MOUSE_SENSITIVITY 0.001 / 1.2
 
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
@@ -874,7 +875,7 @@ void init() {
 	std::cout << u_LightPos << " " << u_LightColor << " " << u_AmbientLight << " " << u_MvpMat << " " << u_ModelMat << " " << u_NormalMat << std::endl;
 
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	project = glm::perspective(glm::radians(45.0f), 1024.0f / 768.0f, 0.01f, 100.0f);
+	project = glm::perspective(glm::radians(90.0f), 1024.0f / 768.0f, 0.01f, 100.0f);
 
 	makeModels();
 }
@@ -955,6 +956,8 @@ void handleInput() {
 		view = glm::translate(glm::mat4(), glm::vec3(0.0f, 1.0f, 0.0f) * cameraSpeed) * view;
 	}
 
+	pitch = std::min(((float) PI) / 2.0f, std::max(-((float) PI) / 2.0f, pitch));
+
 
 	view = glm::rotate(glm::mat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) * view;
 
@@ -964,7 +967,17 @@ void handleInput() {
 
 	oldYaw = yaw;
 	oldPitch = pitch;
-	pitch = std::min(((float) PI) / 2.0f, std::max(-((float) PI) / 2.0f, pitch));
+
+	double x, y;
+}
+
+void cursorCallback(GLFWwindow* window, double xPos, double yPos) {
+	double dx = xPos - (1024.0 / 2.0);
+	double dy = yPos - (768.0 / 2.0);
+
+	yaw += MOUSE_SENSITIVITY * dx;
+	pitch += MOUSE_SENSITIVITY * dy;
+
 }
 
 int main() {
@@ -1005,6 +1018,8 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
+	glfwSetCursorPosCallback(window, cursorCallback);
 
 	init();
 
