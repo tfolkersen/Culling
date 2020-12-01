@@ -1,45 +1,42 @@
+//rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9)); //benchmark reference
 #include <iostream>
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
-
+//GL stuff
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+//To load vertex and fragment shaders
 #include <common/shader.hpp>
+
 #include <ctime>
-//#include <immintrin.h>
 
 #include <vector>
 #include <algorithm>
+
+//Stuff for file i/o
 #include <fstream>
 #include <sstream>
 #include <string>
 
-#define KEY_FORWARD GLFW_KEY_W
-#define KEY_LEFT GLFW_KEY_A
-#define KEY_BACK GLFW_KEY_S
-#define KEY_RIGHT GLFW_KEY_D
-#define KEY_UP GLFW_KEY_SPACE
-#define KEY_DOWN GLFW_KEY_LEFT_SHIFT
-#define KEY_SWAP_MODELS GLFW_KEY_F
-#define FPS 60
+//////////////////// Controls
+//Keys
+#define KEY_FORWARD GLFW_KEY_W //Move forward
+#define KEY_LEFT GLFW_KEY_A //Move left
+#define KEY_BACK GLFW_KEY_S //Move backwards
+#define KEY_RIGHT GLFW_KEY_D //Move right
+#define KEY_UP GLFW_KEY_SPACE //Move up
+#define KEY_DOWN GLFW_KEY_LEFT_SHIFT //Move down
+#define KEY_SWAP_MODELS GLFW_KEY_F //Toggle model rendering modes (normal/occluder mesh/bounding box)
 
-#define KEY_R_UP GLFW_KEY_UP
-#define KEY_R_DOWN GLFW_KEY_DOWN
-#define KEY_R_LEFT GLFW_KEY_LEFT
-#define KEY_R_RIGHT GLFW_KEY_RIGHT
+GLfloat cameraSpeed = 0.05f; //Camera movement per frame in any direction
+#define MOUSE_SENSITIVITY 0.001 / 1.6 //How fast to rotate the camera with mouse movement
+
 
 #define PI 3.141592654
+#define FPS 60 //Max frames per second
 
-GLfloat cameraSpeed = 0.05f;
-GLfloat rotationSpeed = 0.025;
-
-#define MOUSE_SENSITIVITY 0.001 / 1.6
 
 enum replayEnum {CONTROL, RECORD, PLAY};
 int replayMode = CONTROL;
@@ -67,8 +64,6 @@ void printPair(std::pair<T, T>& p) {
 	std::cout << "<" << p.first << " " << p.second << ">";
 }
 
-void test();
-
 void fpsWait(double seconds) {
 	if (seconds < 0) {
 		return;
@@ -84,18 +79,6 @@ void printBits(uint32_t v) {
 		std::cout << ((v & (1 << (31 - i))) != 0);
 	}
 }
-
-//1024x768
-//#define BUFFER_WIDTH 32*32
-//#define BUFFER_HEIGHT 32*24
-
-//1600x1056
-//#define BUFFER_WIDTH 32*50
-//#define BUFFER_HEIGHT 32*33
-
-//640x480
-//#define BUFFER_WIDTH 32*20
-//#define BUFFER_HEIGHT 32*15
 
 #define BUFFER_WIDTH 32
 #define BUFFER_HEIGHT 32
@@ -271,7 +254,6 @@ Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b, std::vecto
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> normals;
 
-	//std::vector<GLfloat> posData;
 	std::vector<GLfloat> normalData;
 	std::vector<GLfloat> colorData;
 
@@ -299,7 +281,6 @@ Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b, std::vecto
 		}
 	}
 	f.close();
-
 
 	f = std::fstream(fileName);
 	while (std::getline(f, line)) {
@@ -365,20 +346,6 @@ Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b, std::vecto
 }
 
 
-std::pair<int, int> convert(const glm::vec2 &v) {
-	int W = BUFFER_WIDTH - 1;
-	int H = BUFFER_HEIGHT - 1;
-	GLfloat Wf = (GLfloat)W;
-	GLfloat Hf = (GLfloat)H;
-	int x = round((Wf / 2.0) * v.x + (Wf / 2.0));
-	int y = round(-(Hf / 2.0) * v.y + (Hf / 2.0));
-
-	//int x = (Wf / 2.0) * v.x + (Wf / 2.0);
-	//int y = -(Hf / 2.0) * v.y + (Hf / 2.0);
-
-	return std::pair<int, int>(x, y);
-}
-
 void convertVec(glm::vec2 &v) {
 	int W = BUFFER_WIDTH - 1;
 	int H = BUFFER_HEIGHT - 1;
@@ -429,145 +396,6 @@ void fixTriangle(glm::vec2 &t1, glm::vec2 &t2, glm::vec2 &t3) {
 	}
 }
 
-/*
-void rasterizeSilentAVX(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
-	fixTriangle(t1, t2, t3);
-
-	GLfloat cx = (t1.x + t2.x + t3.x) / 3.0f;
-	GLfloat cy = (t1.y + t2.y + t3.y) / 3.0f;
-	glm::vec2 center(cx, cy);
-
-	std::vector<glm::vec2*> ps;
-	ps.push_back(&t1);
-	ps.push_back(&t2);
-	ps.push_back(&t3);
-	std::sort(ps.begin(), ps.end(), triComp);
-
-	glm::vec2& p1 = *ps[0];
-	glm::vec2& p2 = *ps[1];
-	glm::vec2& p3 = *ps[2];
-
-	glm::vec2 l1 = p2 - p1;
-	glm::vec2 l2 = p3 - p1;
-	glm::vec2 l3 = p3 - p2;
-
-	glm::vec2 n1(l1.y, -l1.x);
-	glm::vec2 n2(l2.y, -l2.x);
-	glm::vec2 n3(l3.y, -l3.x);
-
-	//true if left is outside
-	bool o1 = glm::dot(n1, (center - p1)) < 0;
-	bool o2 = glm::dot(n2, (center - p1)) < 0;
-	bool o3 = glm::dot(n3, (center - p2)) < 0;
-	uint32_t mask1 = o1 ? 0 : ~0;
-	uint32_t mask2 = o2 ? 0 : ~0;
-	uint32_t mask3 = o3 ? 0 : ~0;
-
-//	GLfloat s1 = l1.x / l1.y;
-//	GLfloat s2 = l2.x / l2.y;
-//	GLfloat s3 = l3.x / l3.y;
-//
-//	GLfloat slopeFactor = (GLfloat)HEIGHT / 2;
-//	s1 /= slopeFactor;
-//	s2 /= slopeFactor;
-//	s3 /= slopeFactor;
-
-	glm::vec2 f1 = p1 + ((1.0f - p1.y) / l1.y) * l1;
-	glm::vec2 f2 = p1 + ((1.0f - p1.y) / l2.y) * l2;
-	glm::vec2 f3 = p2 + ((1.0f - p2.y) / l3.y) * l3;
-
-	convertVec(f1);
-	convertVec(f2);
-	convertVec(f3);
-	convertVec(p1);
-	convertVec(p2);
-	convertVec(p3);
-	l1 = p2 - p1;
-	l2 = p3 - p1;
-	l3 = p3 - p2;
-	GLfloat s1 = l1.x / l1.y;
-	GLfloat s2 = l2.x / l2.y;
-	GLfloat s3 = l3.x / l3.y;
-
-	//std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
-	GLfloat minY = std::min(p1.y, std::min(p2.y, p3.y));
-	GLfloat maxY = std::max(p1.y, std::max(p2.y, p3.y));
-	GLfloat minX = std::min(p1.x, std::min(p2.x, p3.x));
-	GLfloat maxX = std::max(p1.x, std::max(p2.x, p3.x));
-
-	int iStart = std::max(((int)minY) / BLOCK_HEIGHT, 0);
-	int iEnd = std::min(((int)maxY) / BLOCK_HEIGHT, (int) dBuffer.heightB - 1);
-
-	int jStart = std::max(((int)minX) / 32, 0);
-	int jEnd = std::min(((int)maxX) / 32, (int) dBuffer.widthB - 1);
-	
-	__m256 v_f1x = _mm256_set_ps(f1.x, f1.x, f1.x, f1.x, f1.x, f1.x, f1.x, f1.x);
-	__m256 v_f2x = _mm256_set_ps(f2.x, f2.x, f2.x, f2.x, f2.x, f2.x, f2.x, f2.x);
-	__m256 v_f3x = _mm256_set_ps(f3.x, f3.x, f3.x, f3.x, f3.x, f3.x, f3.x, f3.x);
-
-	__m256 v_s1 = _mm256_set_ps(s1, s1, s1, s1, s1, s1, s1, s1);
-	__m256 v_s2 = _mm256_set_ps(s2, s2, s2, s2, s2, s2, s2, s2);
-	__m256 v_s3 = _mm256_set_ps(s3, s3, s3, s3, s3, s3, s3, s3);
-
-	__m256 v_scanOffset = _mm256_set_ps(7.0f, 6.0f, 5.0f, 4.0f, 3.0f, 2.0f, 1.0f, 0.0f);
-
-	GLfloat e1f[BLOCK_HEIGHT];
-	GLfloat e2f[BLOCK_HEIGHT];
-	GLfloat e3f[BLOCK_HEIGHT];
-
-	for (int i = iStart; i <= iEnd ; i++) {
-		GLfloat scanBase = (GLfloat) i * BLOCK_HEIGHT;
-
-		__m256 v_scanBase = _mm256_set_ps(scanBase, scanBase, scanBase, scanBase, scanBase, scanBase, scanBase, scanBase);
-		__m256 v_scanLine = _mm256_add_ps(v_scanBase, v_scanOffset);
-
-		__m256 v_e1f = v_f1x;
-		__m256 v_mul1 = _mm256_mul_ps(v_scanLine, v_s1);
-		v_e1f = _mm256_add_ps(v_e1f, v_mul1);
-		_mm256_storeu_ps(e1f, v_e1f);
-
-
-		__m256 v_e2f = v_f2x;
-		__m256 v_mul2 = _mm256_mul_ps(v_scanLine, v_s2);
-		v_e2f = _mm256_add_ps(v_e2f, v_mul2);
-		_mm256_storeu_ps(e2f, v_e2f);
-
-		__m256 v_e3f = v_f3x;
-		__m256 v_mul3 = _mm256_mul_ps(v_scanLine, v_s3);
-		v_e3f = _mm256_add_ps(v_e3f, v_mul3);
-		_mm256_storeu_ps(e3f, v_e3f);
-
-		//GLfloat e1f[BLOCK_HEIGHT];
-		//GLfloat e2f[BLOCK_HEIGHT];
-		//GLfloat e3f[BLOCK_HEIGHT];
-
-		//e1f[0] = f1.x + (GLfloat)scanBase * s1;
-		//e2f[0] = f2.x + (GLfloat)scanBase * s2;
-		//e3f[0] = f3.x + (GLfloat)scanBase * s3;
-
-		//for (int r = 1; r < BLOCK_HEIGHT; r++) {
-		//	e1f[r] = e1f[r - 1] + s1;
-		//	e2f[r] = e2f[r - 1] + s2;
-		//	e3f[r] = e3f[r - 1 ] + s3;
-		//}
-
-		for (int j = jStart; j <= jEnd; j++) {
-			Block& b = dBuffer.getBlock(j, i);
-
-			for (int k = 0; k < BLOCK_HEIGHT; k++) {
-				//These lines are important
-				uint32_t e1 = std::max(0.0f, e1f[k] - j * 32.0f);
-				uint32_t e2 = std::max(0.0f, e2f[k] - j * 32.0f);
-				uint32_t e3 = std::max(0.0f, e3f[k] - j * 32.0f);
-
-				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
-				b.bits[k] = result;
-			}
-		}
-	}
-}
-*/
-
 void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	fixTriangle(t1, t2, t3);
 
@@ -600,15 +428,6 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	uint32_t mask1 = o1 ? 0 : ~0;
 	uint32_t mask2 = o2 ? 0 : ~0;
 	uint32_t mask3 = o3 ? 0 : ~0;
-
-	//	GLfloat s1 = l1.x / l1.y;
-	//	GLfloat s2 = l2.x / l2.y;
-	//	GLfloat s3 = l3.x / l3.y;
-	//
-	//	GLfloat slopeFactor = (GLfloat)HEIGHT / 2;
-	//	s1 /= slopeFactor;
-	//	s2 /= slopeFactor;
-	//	s3 /= slopeFactor;
 
 	glm::vec2 f1 = p1 + ((1.0f - p1.y) / l1.y) * l1;
 	glm::vec2 f2 = p1 + ((1.0f - p1.y) / l2.y) * l2;
@@ -675,172 +494,6 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	}
 }
 
-
-
-
-
-void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
-	fixTriangle(t1, t2, t3);
-
-	GLfloat cx = (t1.x + t2.x + t3.x) / 3.0f;
-	GLfloat cy = (t1.y + t2.y + t3.y) / 3.0f;
-	glm::vec2 center(cx, cy);
-
-	std::vector<glm::vec2*> ps;
-	ps.push_back(&t1);
-	ps.push_back(&t2);
-	ps.push_back(&t3);
-	std::sort(ps.begin(), ps.end(), triComp);
-
-	//std::cout << "Sorted: ";
-	//for (auto it = ps.begin(); it != ps.end(); it++) {
-	//	std::cout << (**it).y << " ";
-	//}
-	//std::cout << std::endl;
-
-	glm::vec2& p1 = *ps[0];
-	glm::vec2& p2 = *ps[1];
-	glm::vec2& p3 = *ps[2];
-
-	glm::vec2 l1 = p2 - p1;
-	glm::vec2 l2 = p3 - p1;
-	glm::vec2 l3 = p3 - p2;
-
-	glm::vec2 n1(l1.y, -l1.x);
-	glm::vec2 n2(l2.y, -l2.x);
-	glm::vec2 n3(l3.y, -l3.x);
-	n1 = glm::normalize(n1);
-	n2 = glm::normalize(n2);
-	n3 = glm::normalize(n3);
-
-	//true if left is outside
-	bool o1 = glm::dot(n1, (center - p1)) < 0;
-	bool o2 = glm::dot(n2, (center - p1)) < 0;
-	bool o3 = glm::dot(n3, (center - p2)) < 0;
-	uint32_t mask1 = o1 ? 0 : ~0;
-	uint32_t mask2 = o2 ? 0 : ~0;
-	uint32_t mask3 = o3 ? 0 : ~0;
-
-	//printVec(p1);
-	//std::cout << std::endl;
-	//printVec(p2);
-	//std::cout << std::endl;
-	//printVec(p3);
-	//std::cout << std::endl;
-	//std::cout << o1 << " " << o2 << " " << o3 << std::endl;
-
-	GLfloat s1 = l1.x / l1.y;
-	GLfloat s2 = l2.x / l2.y;
-	GLfloat s3 = l3.x / l3.y;
-
-	GLfloat slopeFactor = (GLfloat)BUFFER_HEIGHT / 2;
-	s1 /= slopeFactor;
-	s2 /= slopeFactor;
-	s3 /= slopeFactor;
-
-	//std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
-
-	auto pair1 = convert(p1);
-	auto pair2 = convert(p2);
-	auto pair3 = convert(p3);
-
-	//printPair(pair1);
-	//std::cout << std::endl;
-	//printPair(pair2);
-	//std::cout << std::endl;
-	//printPair(pair3);
-	//std::cout << std::endl;
-
-	glm::vec2 f1 = p1 + ((1.0f - p1.y) / l1.y) * l1;
-	glm::vec2 f2 = p1 + ((1.0f - p1.y) / l2.y) * l2;
-	glm::vec2 f3 = p2 + ((1.0f - p2.y) / l3.y) * l3;
-	//printVec(f1);
-	//printVec(f2);
-	//printVec(f3);
-	//std::cout << std::endl;
-
-
-	for (int i = 0; i < dBuffer.heightB; i++) {
-		for (int j = 0; j < dBuffer.widthB; j++) {
-			Block& b = dBuffer.getBlock(j, i);
-
-			for (int k = 0; k < BLOCK_HEIGHT; k++) {
-				int scanLine = i * BLOCK_HEIGHT + k;
-				std::pair<int, int> conv1 = convert(f1 - glm::vec2(1, 0) * (GLfloat) scanLine * s1);
-				std::pair<int, int> conv2 = convert(f2 - glm::vec2(1, 0) * (GLfloat) scanLine * s2);
-				std::pair<int, int> conv3 = convert(f3 - glm::vec2(1, 0) * (GLfloat) scanLine * s3);
-
-				uint32_t e1 = std::max(0, conv1.first - j * 32);
-				uint32_t e2 = std::max(0, conv2.first - j * 32);
-				uint32_t e3 = std::max(0, conv3.first - j * 32);
-
-				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
-				b.bits[k] = result;
-
-				//printBits(result);
-				//std::cout << "{ " << e1 << " " << e2 << " " << e3 << " }" << std::endl;
-
-			}
-		}
-	}
-
-
-	/*
-	for (int i = 0; i < 32; i++) {
-		std::pair<int, int> conv1 = convert(f1);
-		std::pair<int, int> conv2 = convert(f2);
-		std::pair<int, int> conv3 = convert(f3);
-		uint32_t e1 = std::max(0, conv1.first);
-		uint32_t e2 = std::max(0, conv2.first);
-		uint32_t e3 = std::max(0, conv3.first);
-
-		uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
-		printBits(result);
-		std::cout << "{" << conv1.first << " " << conv2.first << " " << conv3.first << "} ";
-		std::cout << f1.x << " - " << f2.x << " - " << f3.x;
-		std::cout << std::endl;
-
-		f1.x -= s1 / 16.0;
-		f2.x -= s2 / 16.0;
-		f3.x -= s3 / 16.0;
-	}
-	*/
-}
-
-void jank() { //120-125x improvement
-	return;
-	//meme();
-	//exit(0);
-
-	//in 1600x1056
-	//rasterize takes about 40 seconds to render 4000
-	//rasterizeSilent takes about 0.317 seconds to render 4000
-
-	//in 1024x768
-	//rasterize takes about 18.5 seconds to render 4000
-	//rasterizeSilent takes about 0.153 seconds to render 4000
-
-	//rasterize(glm::vec2(-0.5f, 0.5f), glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.3f));
-	//rasterize(glm::vec2(), glm::vec2(), glm::vec2());
-
-	dBuffer.reset();
-	clock_t start = clock();
-
-	std::cout << "Starting rasterize" << std::endl;
-	for (int i = 0; i < 1; i++) {
-		rasterizeSilent(glm::vec2(0.5, -0.4), glm::vec2(-0.6, -0.3), glm::vec2(-0.04, -0.9)); //benchmark reference
-		//rasterizeSilent(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
-	}
-	//rasterize(glm::vec2(-0.5f, 0.0f), glm::vec2(0.0f, 0.5f), glm::vec2(0.5f, 0.0f));
-	std::cout << "Done rasterize" << std::endl;
-	clock_t end = clock();
-	std::cout << "Time " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
-
-	//std::cout << "Printing buffer" << std::endl;
-	//dBuffer.print();
-}
-
-
 GLuint programID;
 GLFWwindow* window = NULL;
 
@@ -861,8 +514,6 @@ GLfloat pitch = 0.0f;
 GLfloat oldYaw = yaw;
 GLfloat oldPitch = pitch;
 
-
-
 void setMatrices() {
 	glUniformMatrix4fv(u_MvpMat, 1, GL_FALSE, &mvp[0][0]);
 	glUniformMatrix4fv(u_ModelMat, 1, GL_FALSE, &model[0][0]);
@@ -877,7 +528,6 @@ void setLights() {
 	glUniform3f(u_LightColor, lightColor[0], lightColor[1], lightColor[2]);
 	glUniform3f(u_AmbientLight, ambientLight[0], ambientLight[1], ambientLight[2]);
 }
-
 
 void drawModel(Model &m) {
 	glBindVertexArray(m.varr);
@@ -1016,7 +666,6 @@ void render() {
 	model = glm::rotate(glm::mat4(), rad, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	mvp = project * view * model;
-	test();
 	drawModel(box);
 
 	model = glm::mat4();
@@ -1233,7 +882,6 @@ void cursorCallback(GLFWwindow* window, double xPos, double yPos) {
 
 
 int main() {
-	jank();
 	if (glfwInit() != GL_TRUE) {
 		std::cerr << "Failed to init glfw" << std::endl;
 		return -1;
@@ -1306,46 +954,4 @@ int main() {
 	replayFile.close();
 	std::cout << "Ending on frame " << currentFrame << std::endl;
 	return 0;
-}
-
-
-void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
-	p1 = mvp * p1;
-	p2 = mvp * p2;
-	p3 = mvp * p3;
-	p1 /= p1.a;
-	p2 /= p2.a;
-	p3 /= p3.a;
-
-	glm::vec2 t1(p1.x, p1.y);
-	glm::vec2 t2(p2.x, p2.y);
-	glm::vec2 t3(p3.x, p3.y);
-
-	std::cout << "depths (" << p1.z << " " << p2.z << " " << p3.z << ")" << std::endl;
-
-	if (abs(p1.z) >= 1.0f && abs(p2.z) >= 1.0f && abs(p3.z) >= 1.0f) {
-		return;
-	}
-
-	rasterizeSilent(t1, t2, t3);
-}
-
-
-void test() {
-	return;
-	glm::vec4 p1(1.0f, 1.0f, 0.0f, 1.0f);
-	glm::vec4 p2(-1.0f, 1.0f, 0.0f, 1.0f);
-	glm::vec4 p3(-1.0f, 0.0f, 0.0f, 1.0f);
-	glm::vec4 p4(-1.0f, 0.0f, 0.0f, 1.0f);
-	glm::vec4 p5(1.0f, 0.0f, 0.0f, 1.0f);
-	glm::vec4 p6(1.0f, 1.0f, 0.0f, 1.0f);
-	
-	dBuffer.reset();
-	maskVec4s(p1, p2, p3);
-	maskVec4s(p4, p5, p6);
-	dBuffer.print();
-
-
-
-
 }
