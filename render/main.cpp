@@ -58,6 +58,11 @@ void printVec(glm::vec2& v) {
 	std::cout << "[" << v.x << " " << v.y << "]";
 }
 
+void printVec(glm::vec4& v) {
+	std::cout << "[" << v.x << " " << v.y << " " << v.z << "]";
+}
+
+
 template<class T>
 void printPair(std::pair<T, T>& p) {
 	std::cout << "<" << p.first << " " << p.second << ">";
@@ -1228,25 +1233,74 @@ int main() {
 
 
 void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
-	p1 = mvp * p1;
-	p2 = mvp * p2;
-	p3 = mvp * p3;
+	p1 = view * model * p1;
+	p2 = view * model * p2;
+	p3 = view * model * p3;
 	p1 /= p1.a;
 	p2 /= p2.a;
 	p3 /= p3.a;
+	printVec(p1);
+	printVec(p2);
+	printVec(p3);
+	std::cout << std::endl;
+	std::vector<int> sign1;
+
+	#define SIGN(element) \
+	(element > 0) - (element < 0)
+
+	sign1.push_back(SIGN(p1.x));
+	sign1.push_back(SIGN(p1.y));
+	sign1.push_back(SIGN(p2.x));
+	sign1.push_back(SIGN(p2.y));
+	sign1.push_back(SIGN(p3.x));
+	sign1.push_back(SIGN(p3.y));
+	p1 = project * p1;
+	p2 = project * p2;
+	p3 = project * p3;
+	p1 /= p1.a;
+	p2 /= p2.a;
+	p3 /= p3.a;
+	printVec(p1);
+	printVec(p2);
+	printVec(p3);
+	std::cout << std::endl;
+	std::vector<int> sign2;
+	sign2.push_back(SIGN(p1.x));
+	sign2.push_back(SIGN(p1.y));
+	sign2.push_back(SIGN(p2.x));
+	sign2.push_back(SIGN(p2.y));
+	sign2.push_back(SIGN(p3.x));
+	sign2.push_back(SIGN(p3.y));
+
+	#define FIX_SIGN(element, sign) \
+	if (sign != 0 && SIGN(element) != sign) {\
+		element *= sign;\
+	}
+
+	//FIX_SIGN(p1.x, sign1[0]);
+	//FIX_SIGN(p1.y, sign1[1]);
+	//FIX_SIGN(p2.x, sign1[2]);
+	//FIX_SIGN(p2.y, sign1[3]);
+	//FIX_SIGN(p3.x, sign1[4]);
+	//FIX_SIGN(p3.y, sign1[5]);
+
+
+
+	
+
 
 	glm::vec2 t1(p1.x, p1.y);
 	glm::vec2 t2(p2.x, p2.y);
 	glm::vec2 t3(p3.x, p3.y);
 
 	std::cout << "depths (" << p1.z << " " << p2.z << " " << p3.z << ")" << std::endl;
-	printVec(t1);
-	printVec(t2);
-	printVec(t3);
+	//printVec(t1);
+	//printVec(t2);
+	//printVec(t3);
 	std::cout << std::endl;
 
 
-	if (abs(p1.z) >= 1.0f || abs(p2.z) >= 1.0f || abs(p3.z) >= 1.0f) {
+	if (sign1 != sign2) {
 		std::cout << "\033[1;31m";
 	} else {
 		std::cout << "\033[1;37m";
