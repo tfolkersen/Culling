@@ -11,8 +11,8 @@ void printVec(glm::vec2& v) {
 	std::cout << "[" << v.x << " " << v.y << "]";
 }
 
-template<class T>
-void printPair(std::pair<T, T>& p) {
+template<class T, class S>
+void printPair(std::pair<T, S>& p) {
 	std::cout << "<" << p.first << " " << p.second << ">";
 }
 
