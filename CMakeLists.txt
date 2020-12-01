@@ -61,6 +61,16 @@ add_executable(render
 	render/main.cpp
 	common/shader.cpp
 	common/shader.hpp
+	render/cull.cpp
+	render/cull.h
+	render/draw.cpp
+	render/draw.h
+	render/models.cpp
+	render/models.h
+	render/utility.cpp
+	render/utility.h
+	render/control.h
+	render/control.cpp
 )
 target_link_libraries(render
 	${ALL_LIBS}
