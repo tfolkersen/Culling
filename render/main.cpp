@@ -41,7 +41,7 @@ GLfloat rotationSpeed = 0.025;
 #define MOUSE_SENSITIVITY 0.001 / 1.6
 
 enum replayEnum {CONTROL, RECORD, PLAY};
-int replayMode = PLAY;
+int replayMode = CONTROL;
 
 std::string replayFileName = "replay.txt";
 std::fstream replayFile;
@@ -62,6 +62,8 @@ template<class T>
 void printPair(std::pair<T, T>& p) {
 	std::cout << "<" << p.first << " " << p.second << ">";
 }
+
+void test();
 
 void fpsWait(double seconds) {
 	if (seconds < 0) {
@@ -88,11 +90,11 @@ void printBits(uint32_t v) {
 //#define BUFFER_HEIGHT 32*33
 
 //640x480
-#define BUFFER_WIDTH 32*20
-#define BUFFER_HEIGHT 32*15
+//#define BUFFER_WIDTH 32*20
+//#define BUFFER_HEIGHT 32*15
 
-//#define BUFFER_WIDTH 32
-//#define BUFFER_HEIGHT 8
+#define BUFFER_WIDTH 32
+#define BUFFER_HEIGHT 32
 
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
@@ -614,7 +616,8 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 				uint32_t e3 = std::max(0.0f, e3f[k] - j * 32.0f);
 
 				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
-				b.bits[k] = result;
+				//b.bits[k] = result;
+				b.bits[k] |= result;
 			}
 		}
 	}
@@ -947,6 +950,7 @@ void render() {
 	model = glm::rotate(glm::mat4(), rad, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	mvp = project * view * model;
+	test();
 	drawModel(box);
 
 	model = glm::mat4();
@@ -1219,3 +1223,43 @@ int main() {
 	return 0;
 }
 
+
+void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
+	p1 = mvp * p1;
+	p2 = mvp * p2;
+	p3 = mvp * p3;
+	p1 /= p1.a;
+	p2 /= p2.a;
+	p3 /= p3.a;
+
+	glm::vec2 t1(p1.x, p1.y);
+	glm::vec2 t2(p2.x, p2.y);
+	glm::vec2 t3(p3.x, p3.y);
+
+	std::cout << "depths (" << p1.z << " " << p2.z << " " << p3.z << ")" << std::endl;
+
+	if (abs(p1.z) >= 1.0f && abs(p2.z) >= 1.0f && abs(p3.z) >= 1.0f) {
+		return;
+	}
+
+	rasterizeSilent(t1, t2, t3);
+}
+
+
+void test() {
+	glm::vec4 p1(1.0f, 1.0f, 0.0f, 1.0f);
+	glm::vec4 p2(-1.0f, 1.0f, 0.0f, 1.0f);
+	glm::vec4 p3(-1.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 p4(-1.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 p5(1.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 p6(1.0f, 1.0f, 0.0f, 1.0f);
+	
+	dBuffer.reset();
+	maskVec4s(p1, p2, p3);
+	maskVec4s(p4, p5, p6);
+	dBuffer.print();
+
+
+
+
+}
