@@ -120,6 +120,11 @@ void render() {
 	double seconds = clock() / (double)CLOCKS_PER_SEC;
 	lightPos = glm::vec3(4.0f * cos(seconds), 0.0f, 4.0f * sin(seconds));
 
+
+	glm::vec4 center = office.modelMatrix * glm::vec4(office.boxCenter, 1);
+	center /= center.a;
+	lightPos = glm::vec3(center);
+
 	glClearColor(0.3f, 0.3f, 0.3f, 0.5f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

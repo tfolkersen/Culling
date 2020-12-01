@@ -39,6 +39,7 @@ Model3 parseModel3(std::string mainFileName, GLfloat r, GLfloat g, GLfloat b, st
 	m.main = parseObj(mainFileName, r, g, b);
 	m.occluder = parseObj(occluderFileName, 1.0f, 0.0f, 0.0f, m.occluderData);
 	m.box = parseObj(boxFileName, 1.0f, 1.0f, 0.0f, m.boxData);
+	m.boxCenter = modelDataCenter(m.boxData);
 
 	return m;
 }
@@ -144,4 +145,27 @@ Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b, std::vecto
 
 }
 
+glm::vec3 modelDataCenter(const std::vector<GLfloat> &data) {
+	GLfloat minX = data[0];
+	GLfloat maxX = minX;
+	GLfloat minY = data[1];
+	GLfloat maxY = minY;
+	GLfloat minZ = data[2];
+	GLfloat maxZ = minZ;
 
+	for (auto it = data.begin(); it != data.end();) {
+		minX = std::min(minX, *it);
+		maxX = std::max(maxX, *it);
+		it++;
+
+		minY = std::min(minY, *it);
+		maxY = std::max(maxY, *it);
+		it++;
+
+		minZ = std::min(minZ, *it);
+		maxZ = std::max(maxZ, *it);
+		it++;
+	}
+
+	return glm::vec3((minX + maxX) / 2.0f, (minY + maxY) / 2.0f, (minZ + maxZ) / 2.0f);
+}
