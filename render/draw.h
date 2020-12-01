@@ -27,6 +27,8 @@ extern glm::mat4 normal;
 extern glm::mat4 view;
 extern glm::mat4 project;
 
+extern std::vector<Model3> sceneModels;
+
 
 
 void setMatrices();
@@ -40,3 +42,11 @@ void drawModel3(Model3& m);
 void makeModels();
 
 void render();
+
+
+void makeScene2();
+bool modelComparator(const Model3& m1, const Model3& m2);
+
+void render2();
+
+double distSquaredToCamera(const Model3& m);

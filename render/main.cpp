@@ -43,7 +43,7 @@ void init() {
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	project = glm::perspective(glm::radians(90.0f), (GLfloat) SCREEN_WIDTH / (GLfloat) SCREEN_HEIGHT, 0.01f, 100.0f);
 
-	makeModels();
+	makeScene2();
 
 	if (replayMode == PLAY) {
 		replayFile.open(replayFileName, std::fstream::in);
@@ -120,7 +120,7 @@ int main() {
 		recordedFrameNumber = false;
 
 		clock_t start = clock();
-		render();
+		render2();
 		glfwSwapBuffers(window);
 
 		glfwPollEvents();

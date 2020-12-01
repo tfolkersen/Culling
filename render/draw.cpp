@@ -2,6 +2,7 @@
 #include "control.h"
 #include <ctime>
 #include <glm/gtc/matrix_transform.hpp>
+#include <algorithm>
 
 GLuint programID;
 GLFWwindow* window = NULL;
@@ -10,13 +11,16 @@ GLuint u_LightPos, u_LightColor, u_AmbientLight, u_MvpMat, u_ModelMat, u_NormalM
 
 glm::vec3 lightPos(6.0f, 6.0f, 0.0f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-glm::vec3 ambientLight(0.2f, 0.2f, 0.2f);
+glm::vec3 ambientLight(0.3f, 0.3f, 0.3f);
 
 glm::mat4 mvp;
 glm::mat4 model;
 glm::mat4 normal;
 glm::mat4 view;
 glm::mat4 project;
+
+std::vector<Model3> sceneModels;
+
 
 void setMatrices() {
 	glUniformMatrix4fv(u_MvpMat, 1, GL_FALSE, &mvp[0][0]);
@@ -155,5 +159,59 @@ void render() {
 	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
 	mvp = project * view * model;
 	drawModel(cube);
+}
+
+
+void makeScene2() {
+	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
+
+	
+	office = parseModel3("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj");
+	office.modelMatrix = glm::mat4();
+	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(-1.0f, 0.5f, -7.0f));
+	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+	sceneModels.push_back(office);
+
+
+	office = parseModel3("models/office/main.obj", 0.5f, 0.2f, 1.0f, "models/office/occluder.obj", "models/office/box.obj");
+	office.modelMatrix = glm::mat4();
+	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(1.0f, 1.4f, 1.0f));
+	sceneModels.push_back(office);
+
+}
+
+bool modelComparator(const Model3& m1, const Model3& m2) {
+	return distSquaredToCamera(m1) < distSquaredToCamera(m2);
+}
+
+void render2() {
+	double seconds = clock() / (double)CLOCKS_PER_SEC;
+	lightPos = glm::vec3(6.0f * cos(seconds), 4.0f, 6.0f * sin(seconds) - 2.0f);
+
+	glClearColor(0.3f, 0.3f, 0.3f, 0.5f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	setLights();
+
+
+	std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
+	drawModel3(sceneModels[0]);
+
+	//for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
+	//	drawModel3(*it);
+	//}
+
+	model = glm::mat4();
+	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+	mvp = project * view * model;
+	drawModel(cube);
+}
+
+double distSquaredToCamera(const Model3 &m) {
+	glm::vec4 transformed = view * m.modelMatrix * glm::vec4(m.boxCenter, 1.0f);
+	glm::vec3 p = glm::vec3(transformed / transformed.a);
+	return ((double)p.x * p.x) + ((double)p.y * p.y) + ((double)p.z * p.z);
 }
 
