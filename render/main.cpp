@@ -26,7 +26,7 @@
 #define KEY_RIGHT GLFW_KEY_D
 #define KEY_UP GLFW_KEY_SPACE
 #define KEY_DOWN GLFW_KEY_LEFT_SHIFT
-#define FPS 1
+#define FPS 60
 
 #define KEY_R_UP GLFW_KEY_UP
 #define KEY_R_DOWN GLFW_KEY_DOWN
@@ -39,6 +39,16 @@ GLfloat cameraSpeed = 0.05f;
 GLfloat rotationSpeed = 0.025;
 
 #define MOUSE_SENSITIVITY 0.001 / 1.6
+
+enum replayEnum {CONTROL, RECORD, PLAY};
+int replayMode = RECORD;
+
+std::string replayFileName = "replay.txt";
+std::fstream replayFile;
+
+uint64_t currentFrame = 0;
+uint64_t nextReplayFrame = 0;
+bool recordedFrameNumber = false;
 
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
@@ -54,15 +64,12 @@ void printPair(std::pair<T, T>& p) {
 }
 
 void fpsWait(double seconds) {
-	std::cout << "waiting " << seconds << std::endl;
 	if (seconds < 0) {
 		return;
 	}
-	#if defined(WIN32) || defined (_WIN32) || defined(__WIN32)
-	Sleep(seconds / 1000.0);
-	#else
-	usleep(seconds * 1000000.0);
-	#endif
+	clock_t start = clock();
+	while ((clock() - start) / (double) CLOCKS_PER_SEC < seconds) {
+	}
 }
 
 void printBits(uint32_t v) {
@@ -901,6 +908,12 @@ void init() {
 	project = glm::perspective(glm::radians(90.0f), (GLfloat) SCREEN_WIDTH / (GLfloat) SCREEN_HEIGHT, 0.01f, 100.0f);
 
 	makeModels();
+
+	if (replayMode != CONTROL) {
+		replayFile.open(replayFileName, std::fstream::in | std::fstream::out | std::fstream::trunc);
+	}
+
+	std::cout << "Replay file status: " << replayFile.fail() << std::endl;
 }
 
 void render() {
@@ -935,55 +948,96 @@ void render() {
 	drawModel(cube);
 }
 
+void handlePlayback() {
+
+}
+
 bool keyPressed(int key) {
 	return glfwGetKey(window, key) == GLFW_PRESS;
 }
 
+void recordFrameNumber() {
+	if (recordedFrameNumber) {
+		return;
+	}
+	recordedFrameNumber = true;
+	replayFile << "f " << currentFrame << std::endl;
+}
+
+
+void recordTranslate(const glm::vec3 &v, bool beforeRotate) {
+	if (replayMode != RECORD) {
+		return;
+	}
+	recordFrameNumber();
+
+	std::string identifier = "t";
+	if (!beforeRotate) {
+		identifier = "tt";
+	}
+
+	replayFile << identifier << " " << v.x << " " << v.y << " " << v.z << std::endl;
+}
+
+void recordYawPitch(GLfloat dYaw, GLfloat dPitch) {
+	if (replayMode != RECORD) {
+		return;
+	}
+	recordFrameNumber();
+
+	replayFile << "yp " << dYaw << " " << dPitch << std::endl;
+}
+
+void recordQuit() {
+	if (replayMode != RECORD) {
+		return;
+	}
+	recordFrameNumber();
+	replayFile << "e" << std::endl;
+}
+
 void handleInput() {
 	if (keyPressed(GLFW_KEY_ESCAPE)) {
+		recordQuit();
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
 	if (keyPressed(KEY_LEFT)) {
-		view = glm::translate(glm::mat4(), glm::vec3(1.0f, 0.0f, 0.0f) * cameraSpeed) * view;
+		glm::vec3 vec = glm::vec3(1.0f, 0.0f, 0.0f) * cameraSpeed;
+		recordTranslate(vec, true);
+		view = glm::translate(glm::mat4(), vec) * view;
 	}
 
 	if (keyPressed(KEY_RIGHT)) {
-		view = glm::translate(glm::mat4(), glm::vec3(-1.0f, 0.0f, 0.0f) * cameraSpeed) * view;
+		glm::vec3 vec = glm::vec3(-1.0f, 0.0f, 0.0f) * cameraSpeed;
+		recordTranslate(vec, true);
+		view = glm::translate(glm::mat4(), vec) * view;
 	}
 
 	if (keyPressed(KEY_FORWARD)) {
-		view = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 1.0f) * cameraSpeed) * view;
+		glm::vec3 vec = glm::vec3(0.0f, 0.0f, 1.0f) * cameraSpeed;
+		recordTranslate(vec, true);
+		view = glm::translate(glm::mat4(), vec) * view;
 	}
 
 	if (keyPressed(KEY_BACK)) {
-		view = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.0f) * cameraSpeed) * view;
-	}
-
-	if (keyPressed(KEY_R_LEFT)) {
-		yaw -= rotationSpeed;
-	}
-
-	if (keyPressed(KEY_R_RIGHT)) {
-		yaw += rotationSpeed;
-	}
-
-	if (keyPressed(KEY_R_UP)) {
-		pitch -= rotationSpeed;
-	}
-
-	if (keyPressed(KEY_R_DOWN)) {
-		pitch += rotationSpeed;
+		glm::vec3 vec = glm::vec3(0.0f, 0.0f, -1.0f) * cameraSpeed;
+		recordTranslate(vec, true);
+		view = glm::translate(glm::mat4(), vec) * view;
 	}
 
 	view = glm::rotate(glm::mat4(), -oldYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldPitch, glm::vec3(1.0f, 0.0f, 0.0f)) * view;
 
 	if (keyPressed(KEY_UP)) {
-		view = glm::translate(glm::mat4(), glm::vec3(0.0f, -1.0f, 0.0f) * cameraSpeed) * view;
+		glm::vec3 vec = glm::vec3(0.0f, -1.0f, 0.0f) * cameraSpeed;
+		recordTranslate(vec, false);
+		view = glm::translate(glm::mat4(), vec) * view;
 	}
 
 	if (keyPressed(KEY_DOWN)) {
-		view = glm::translate(glm::mat4(), glm::vec3(0.0f, 1.0f, 0.0f) * cameraSpeed) * view;
+		glm::vec3 vec = glm::vec3(0.0f, 1.0f, 0.0f) * cameraSpeed;
+		recordTranslate(vec, false);
+		view = glm::translate(glm::mat4(), vec) * view;
 	}
 
 	pitch = std::min(((float) PI) / 2.0f, std::max(-((float) PI) / 2.0f, pitch));
@@ -991,23 +1045,21 @@ void handleInput() {
 
 	view = glm::rotate(glm::mat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) * view;
 
-	//view = glm::rotate(glm::mat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * view;
-	//view = glm::rotate(glm::mat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldPitch, glm::vec3(1.0f, 0.0f, 0.0f)) * view;
-	//view = glm::rotate(glm::mat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldPitch, glm::vec3(1.0f, 0.0f, 0.0f)) * view;
-
 	oldYaw = yaw;
 	oldPitch = pitch;
-
-	double x, y;
 }
 
 void cursorCallback(GLFWwindow* window, double xPos, double yPos) {
 	double dx = xPos - (SCREEN_WIDTH / 2.0);
 	double dy = yPos - (SCREEN_HEIGHT / 2.0);
 
-	yaw += MOUSE_SENSITIVITY * dx;
-	pitch += MOUSE_SENSITIVITY * dy;
+	GLfloat dYaw = MOUSE_SENSITIVITY * dx;
+	GLfloat dPitch = MOUSE_SENSITIVITY * dy;
 
+	yaw += dYaw;
+	pitch += dPitch;
+
+	recordYawPitch(dYaw, dPitch);
 }
 
 
@@ -1059,19 +1111,29 @@ int main() {
 
 
 	do {
+		recordedFrameNumber = false;
+
 		clock_t start = clock();
 		render();
 		glfwSwapBuffers(window);
 
 		glfwPollEvents();
-		handleInput();
+
+		if (replayMode == PLAY) {
+			handlePlayback();
+		} else {
+			handleInput();
+		}
+
 		glfwSetCursorPos(window, SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0);
 		clock_t end = clock();
 
 		double elapsed = (end - start) / (double)CLOCKS_PER_SEC;
-		//fpsWait(1 / (double)FPS - elapsed);
+		fpsWait(1 / (double)FPS - elapsed);
+		currentFrame++;
 	} while (!glfwWindowShouldClose(window));
 
+	replayFile.close();
 	return 0;
 }
 
