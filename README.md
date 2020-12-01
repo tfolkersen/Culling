@@ -13,3 +13,7 @@ Models used:
 plant model
 https://www.cgtrader.com/free-3d-models/plant/pot-plant/banana-plant-3d-model
 by user "yesid316"
+
+Office building
+https://www.cgtrader.com/free-3d-models/exterior/office/free-office-building
+by user "lukass12"

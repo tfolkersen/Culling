@@ -26,6 +26,7 @@
 #define KEY_RIGHT GLFW_KEY_D
 #define KEY_UP GLFW_KEY_SPACE
 #define KEY_DOWN GLFW_KEY_LEFT_SHIFT
+#define KEY_SWAP_MODELS GLFW_KEY_F
 #define FPS 60
 
 #define KEY_R_UP GLFW_KEY_UP
@@ -42,6 +43,9 @@ GLfloat rotationSpeed = 0.025;
 
 enum replayEnum {CONTROL, RECORD, PLAY};
 int replayMode = CONTROL;
+
+enum modelTypeEnum{MAIN = 0, OCCLUDER = 1, BOX = 2};
+int drawModelType = MAIN;
 
 std::string replayFileName = "replay.txt";
 std::fstream replayFile;
@@ -105,11 +109,44 @@ struct Model {
 	GLuint colBuff;
 	GLuint normBuff;
 	int nVerts;
+
+	Model() {
+	}
+
+	Model(const Model &m) {
+		this->varr = m.varr;
+		this->posBuff = m.posBuff;
+		this->colBuff = m.colBuff;
+		this->nVerts = m.nVerts;
+	}
+};
+
+struct Model3 {
+	Model main;
+	Model occluder;
+	Model box;
+
+	std::vector<GLfloat> occluderData;
+	std::vector<GLfloat> boxData;
+	glm::mat4 modelMatrix;
+
+	Model3() {
+	}
+
+	Model3(const Model3 &m) {
+		this->main = m.main;
+		this->occluder = m.occluder;
+		this->box = m.box;
+		this->occluderData = m.occluderData;
+		this->boxData = m.boxData;
+		this->modelMatrix = m.modelMatrix;
+	}
 };
 
 Model box;
 Model plant;
 Model cube;
+Model3 office;
 
 
 #define BLOCK_HEIGHT 8
@@ -211,7 +248,22 @@ std::vector<std::string> split(std::string str, std::string del) {
 	return list;
 }
 
-Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b) {
+
+Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b, std::vector<GLfloat>& posData = std::vector<GLfloat>());
+
+Model3 parseModel3(std::string mainFileName, GLfloat r, GLfloat g, GLfloat b, std::string occluderFileName, std::string boxFileName) {
+	Model3 m;
+
+	m.main = parseObj(mainFileName, r, g, b);
+	m.occluder = parseObj(occluderFileName, 1.0f, 0.0f, 0.0f, m.occluderData);
+	m.box = parseObj(boxFileName, 1.0f, 1.0f, 0.0f, m.boxData);
+
+	return m;
+}
+
+Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b, std::vector<GLfloat> &posData){
+	posData.clear();
+
 	std::string line;
 	std::vector<std::string> tokens;
 	std::vector<std::vector<std::string>> subtokens;
@@ -219,7 +271,7 @@ Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b) {
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> normals;
 
-	std::vector<GLfloat> posData;
+	//std::vector<GLfloat> posData;
 	std::vector<GLfloat> normalData;
 	std::vector<GLfloat> colorData;
 
@@ -847,6 +899,18 @@ void drawModel(Model &m) {
 	glDrawArrays(GL_TRIANGLES, 0, m.nVerts);
 }
 
+void drawModel3(Model3 &m) {
+	model = m.modelMatrix;
+	mvp = project * view * model;
+	if (drawModelType == OCCLUDER) {
+		drawModel(m.occluder);
+	} else if (drawModelType == BOX) {
+		drawModel(m.box);
+	} else {
+		drawModel(m.main);
+	}
+}
+
 void makeModels() {
 	glGenVertexArrays(1, &box.varr);
 	glBindVertexArray(box.varr);
@@ -893,6 +957,7 @@ void makeModels() {
 
 	plant = parseObj("models/banana_plant.obj", 0.3f, 1.0f, 0.0f);
 	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
+	office = parseModel3("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj");
 }
 
 void init() {
@@ -935,6 +1000,7 @@ void init() {
 }
 
 void render() {
+
 	double seconds = clock() / (double)CLOCKS_PER_SEC;
 	lightPos = glm::vec3(4.0f * cos(seconds), 0.0f, 4.0f * sin(seconds));
 
@@ -959,6 +1025,10 @@ void render() {
 	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	mvp = project * view * model;
 	drawModel(plant);
+
+	model = glm::mat4();
+	mvp = project * view * model;
+	drawModel3(office);
 
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1081,11 +1151,25 @@ void recordQuit() {
 	replayFile << "e" << std::endl;
 }
 
-void handleInput() {
+void handleGlobalInput() {
 	if (keyPressed(GLFW_KEY_ESCAPE)) {
 		recordQuit();
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
+
+	static bool swappedLastFrame = false;
+	bool swapPress = keyPressed(KEY_SWAP_MODELS);
+	if (swapPress && !swappedLastFrame) {
+		swappedLastFrame = true;
+		drawModelType = (drawModelType + 1) % 3;
+	}
+
+	if (!swapPress) {
+		swappedLastFrame = false;
+	}
+}
+
+void handleInput() {
 
 	if (keyPressed(KEY_LEFT)) {
 		glm::vec3 vec = glm::vec3(1.0f, 0.0f, 0.0f) * cameraSpeed;
@@ -1204,6 +1288,7 @@ int main() {
 
 		glfwPollEvents();
 
+		handleGlobalInput();
 		if (replayMode == PLAY) {
 			handlePlayback();
 		} else {
@@ -1247,6 +1332,7 @@ void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
 
 
 void test() {
+	return;
 	glm::vec4 p1(1.0f, 1.0f, 0.0f, 1.0f);
 	glm::vec4 p2(-1.0f, 1.0f, 0.0f, 1.0f);
 	glm::vec4 p3(-1.0f, 0.0f, 0.0f, 1.0f);
