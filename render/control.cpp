@@ -8,8 +8,8 @@
 #include <algorithm>
 
 
-GLfloat cameraSpeed = 0.05f; //Camera movement per frame in any direction
-int replayMode = CONTROL;
+GLfloat cameraSpeed = CAMERA_SPEED_DEFAULT; //Camera movement per frame in any direction
+int replayMode = PLAY;
 
 int drawModelType = MAIN;
 
@@ -163,6 +163,11 @@ void handleGlobalInput() {
 
 
 void handleInput() {
+	if (keyPressed(KEY_SPEED)) {
+		cameraSpeed = CAMERA_SPEED_FAST;
+	} else {
+		cameraSpeed = CAMERA_SPEED_DEFAULT;
+	}
 
 	if (keyPressed(KEY_LEFT)) {
 		glm::vec3 vec = glm::vec3(1.0f, 0.0f, 0.0f) * cameraSpeed;

@@ -13,8 +13,12 @@
 #define KEY_BACK GLFW_KEY_S //Move backwards
 #define KEY_RIGHT GLFW_KEY_D //Move right
 #define KEY_UP GLFW_KEY_SPACE //Move up
-#define KEY_DOWN GLFW_KEY_LEFT_SHIFT //Move down
+#define KEY_DOWN GLFW_KEY_LEFT_CONTROL //Move down
 #define KEY_SWAP_MODELS GLFW_KEY_F //Toggle model rendering modes (normal/occluder mesh/bounding box)
+#define KEY_SPEED GLFW_KEY_LEFT_SHIFT //Move fast
+
+#define CAMERA_SPEED_DEFAULT 0.05f
+#define CAMERA_SPEED_FAST 0.10f;
 
 #define MOUSE_SENSITIVITY 0.001 / 1.6 //How fast to rotate the camera with mouse movement
 
