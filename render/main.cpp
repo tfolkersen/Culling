@@ -41,7 +41,7 @@ GLfloat rotationSpeed = 0.025;
 #define MOUSE_SENSITIVITY 0.001 / 1.6
 
 enum replayEnum {CONTROL, RECORD, PLAY};
-int replayMode = RECORD;
+int replayMode = PLAY;
 
 std::string replayFileName = "replay.txt";
 std::fstream replayFile;
@@ -909,11 +909,26 @@ void init() {
 
 	makeModels();
 
-	if (replayMode != CONTROL) {
-		replayFile.open(replayFileName, std::fstream::in | std::fstream::out | std::fstream::trunc);
+	if (replayMode == PLAY) {
+		replayFile.open(replayFileName, std::fstream::in);
+		if (replayFile.peek() == std::fstream::traits_type::eof()) {
+			std::cout << "Empty replay file used in playback -- program will crash" << std::endl;
+		}
+	} else if (replayMode == RECORD) {
+		replayFile.open(replayFileName, std::fstream::out | std::fstream::trunc);
 	}
 
 	std::cout << "Replay file status: " << replayFile.fail() << std::endl;
+
+	if (replayMode == PLAY) {
+		std::string line;
+		std::vector<std::string> tokens;
+
+		std::getline(replayFile, line);
+		tokens = split(line, " ");
+		nextReplayFrame = std::stoull(tokens[1]);
+	}
+
 }
 
 void render() {
@@ -949,7 +964,73 @@ void render() {
 }
 
 void handlePlayback() {
+	if (currentFrame != nextReplayFrame) {
+		return;
+	}
 
+	std::string line;
+	std::vector<std::string> tokens;
+
+	std::vector<glm::vec3> translation1;
+	std::vector<glm::vec3> translation2;
+	std::vector<std::pair<GLfloat, GLfloat>> yawPitch;
+	bool quit = false;
+
+	//Get all the actions
+	while (true && !replayFile.eof()) {
+		std::getline(replayFile, line);
+		tokens = split(line, " ");
+
+		if (tokens[0] == "f") {
+			nextReplayFrame = std::stoull(tokens[1]);
+			break;
+		} else if (tokens[0] == "t") {
+			GLfloat dx = std::stof(tokens[1]);
+			GLfloat dy = std::stof(tokens[2]);
+			GLfloat dz = std::stof(tokens[3]);
+			translation1.push_back(glm::vec3(dx, dy, dz));
+		} else if (tokens[0] == "tt") {
+			GLfloat dx = std::stof(tokens[1]);
+			GLfloat dy = std::stof(tokens[2]);
+			GLfloat dz = std::stof(tokens[3]);
+			translation2.push_back(glm::vec3(dx, dy, dz));
+		} else if (tokens[0] == "yp") {
+			GLfloat dYaw = std::stof(tokens[1]);
+			GLfloat dPitch = std::stof(tokens[2]);
+			yawPitch.push_back(std::pair<GLfloat, GLfloat>(dYaw, dPitch));
+		} else if (tokens[0] == "e") {
+			quit = true;
+			break;
+		}
+	}
+
+	//Perform all the actions
+
+	if (quit) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	for (auto it = translation1.begin(); it != translation1.end(); it++) {
+		view = glm::translate(glm::mat4(), *it) * view;
+	}
+
+	view = glm::rotate(glm::mat4(), -oldYaw, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(), -oldPitch, glm::vec3(1.0f, 0.0f, 0.0f)) * view;
+
+	for (auto it = translation2.begin(); it != translation2.end(); it++) {
+		view = glm::translate(glm::mat4(), *it) * view;
+	}
+
+	for (auto it = yawPitch.begin(); it != yawPitch.end(); it++) {
+		yaw += it->first;
+		pitch += it->second;
+	}
+
+	pitch = std::min(((float) PI) / 2.0f, std::max(-((float) PI) / 2.0f, pitch));
+
+	view = glm::rotate(glm::mat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f)) * view;
+
+	oldYaw = yaw;
+	oldPitch = pitch;
 }
 
 bool keyPressed(int key) {
@@ -1134,6 +1215,7 @@ int main() {
 	} while (!glfwWindowShouldClose(window));
 
 	replayFile.close();
+	std::cout << "Ending on frame " << currentFrame << std::endl;
 	return 0;
 }
 
