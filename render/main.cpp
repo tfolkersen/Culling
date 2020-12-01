@@ -617,6 +617,8 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 
 				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
 				//b.bits[k] = result;
+				printBits(result);
+				std::cout << " events " << e1 << " " << e2 << " " << e3 << std::endl;
 				b.bits[k] |= result;
 			}
 		}
@@ -854,9 +856,9 @@ void makeModels() {
 	glGenBuffers(1, &box.posBuff);
 	glBindBuffer(GL_ARRAY_BUFFER, box.posBuff);
 	const static GLfloat boxPos[] = {
-	1.0f, 1.0f, 0.0f, //9
-	-1.0f, 1.0f, 0.0f, //7
-	-1.0f, 0.0f, 0.0f, //1
+	//1.0f, 1.0f, 0.0f, //9
+	//-1.0f, 1.0f, 0.0f, //7
+	//-1.0f, 0.0f, 0.0f, //1
 
 	-1.0f, 0.0f, 0.0f, //1
 	1.0f, 0.0f, 0.0f, //3
@@ -867,9 +869,9 @@ void makeModels() {
 	glGenBuffers(1, &box.colBuff);
 	glBindBuffer(GL_ARRAY_BUFFER, box.colBuff);
 	const static GLfloat boxCol[] = {
-		0.0f, 0.0f, 1.0f, //9
-		0.0f, 1.0f, 0.0f, //7
-		1.0f, 0.0f, 0.0f, //1
+		//0.0f, 0.0f, 1.0f, //9
+		//0.0f, 1.0f, 0.0f, //7
+		//1.0f, 0.0f, 0.0f, //1
 
 		1.0f, 0.0f, 0.0f, //1
 		1.0f, 0.0f, 1.0f, //3
@@ -880,16 +882,16 @@ void makeModels() {
 	glGenBuffers(1, &box.normBuff);
 	glBindBuffer(GL_ARRAY_BUFFER, box.normBuff);
 	const static GLfloat boxNorm[] = {
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f,
+	//	0.0f, 0.0f, 1.0f,
+		//0.0f, 0.0f, 1.0f,
+		//0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boxNorm), boxNorm, GL_STATIC_DRAW);
 
-	box.nVerts = 6;
+	box.nVerts = 3;
 
 	plant = parseObj("models/banana_plant.obj", 0.3f, 1.0f, 0.0f);
 	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
@@ -1149,6 +1151,7 @@ void cursorCallback(GLFWwindow* window, double xPos, double yPos) {
 
 
 int main() {
+
 	jank();
 	if (glfwInit() != GL_TRUE) {
 		std::cerr << "Failed to init glfw" << std::endl;
@@ -1237,6 +1240,17 @@ void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
 	glm::vec2 t3(p3.x, p3.y);
 
 	std::cout << "depths (" << p1.z << " " << p2.z << " " << p3.z << ")" << std::endl;
+	printVec(t1);
+	printVec(t2);
+	printVec(t3);
+	std::cout << std::endl;
+
+
+	if (abs(p1.z) >= 1.0f || abs(p2.z) >= 1.0f || abs(p3.z) >= 1.0f) {
+		std::cout << "\033[1;31m";
+	} else {
+		std::cout << "\033[1;37m";
+	}
 
 	if (abs(p1.z) >= 1.0f && abs(p2.z) >= 1.0f && abs(p3.z) >= 1.0f) {
 		return;
@@ -1255,9 +1269,9 @@ void test() {
 	glm::vec4 p6(1.0f, 1.0f, 0.0f, 1.0f);
 	
 	dBuffer.reset();
-	maskVec4s(p1, p2, p3);
+	//maskVec4s(p1, p2, p3);
 	maskVec4s(p4, p5, p6);
-	dBuffer.print();
+	//dBuffer.print();
 
 
 
