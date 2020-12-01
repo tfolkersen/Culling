@@ -92,3 +92,13 @@ void convertVec(glm::vec2 &v) {
 	v.y = -(Hf / 2.0) * v.y + (Hf / 2.0);
 }
 
+void fpsWait(double seconds) {
+	if (seconds < 0) {
+		return;
+	}
+	clock_t start = clock();
+	while ((clock() - start) / (double) CLOCKS_PER_SEC < seconds) {
+	}
+}
+
+
