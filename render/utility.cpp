@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <iostream>
 #include "utility.h"
+#include "cull.h"
 
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
@@ -81,3 +82,13 @@ void fixTriangle(glm::vec2 &t1, glm::vec2 &t2, glm::vec2 &t3) {
 		}
 	}
 }
+
+void convertVec(glm::vec2 &v) {
+	int W = BUFFER_WIDTH - 1;
+	int H = BUFFER_HEIGHT - 1;
+	GLfloat Wf = (GLfloat)W;
+	GLfloat Hf = (GLfloat)H;
+	v.x = (Wf / 2.0) * v.x + (Wf / 2.0);
+	v.y = -(Hf / 2.0) * v.y + (Hf / 2.0);
+}
+
