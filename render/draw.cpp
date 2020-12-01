@@ -196,11 +196,11 @@ void render2() {
 
 
 	std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
-	drawModel3(sceneModels[0]);
+	//drawModel3(sceneModels[0]);
 
-	//for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
-	//	drawModel3(*it);
-	//}
+	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
+		drawModel3(*it);
+	}
 
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));

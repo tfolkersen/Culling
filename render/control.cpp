@@ -9,7 +9,7 @@
 
 
 GLfloat cameraSpeed = CAMERA_SPEED_DEFAULT; //Camera movement per frame in any direction
-int replayMode = PLAY;
+int replayMode = CONTROL;
 
 int drawModelType = MAIN;
 

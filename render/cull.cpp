@@ -21,7 +21,7 @@ uint32_t line(uint32_t e0, uint32_t e1, uint32_t e2, uint32_t o0, uint32_t o1, u
 	return m0 & m1 & m2;
 }
 
-void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
+void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	fixTriangle(t1, t2, t3);
 
 	GLfloat cx = (t1.x + t2.x + t3.x) / 3.0f;
@@ -119,15 +119,12 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	}
 }
 
-
-
-
 void Block::reset() {
 	for (int i = 0; i < BLOCK_HEIGHT; i++) {
 		bits[i] = 0;
 	}
+	depth = 1.0f;
 }
-
 
 DepthBuffer::DepthBuffer() {
 	widthB = (BUFFER_WIDTH / 32);
