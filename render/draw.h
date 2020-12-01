@@ -1,10 +1,10 @@
 #pragma once
+
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-
 #include "models.h"
-
 
 #define FPS 60 //Max frames per second
 

@@ -1,9 +1,6 @@
 #include "cull.h"
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include "utility.h"
-
+#include <vector>
 #include <algorithm>
 
 DepthBuffer dBuffer;

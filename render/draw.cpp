@@ -1,5 +1,7 @@
 #include "draw.h"
 #include "control.h"
+#include <ctime>
+#include <glm/gtc/matrix_transform.hpp>
 
 GLuint programID;
 GLFWwindow* window = NULL;

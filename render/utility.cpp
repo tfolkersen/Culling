@@ -1,7 +1,6 @@
-#include <GL/glew.h>
-#include <iostream>
 #include "utility.h"
 #include "cull.h"
+#include <iostream>
 
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;

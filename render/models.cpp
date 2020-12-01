@@ -1,8 +1,6 @@
 #include "models.h"
 #include "utility.h"
-#include <string>
 #include <fstream>
-
 
 Model::Model() {
 }
