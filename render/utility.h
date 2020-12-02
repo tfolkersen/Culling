@@ -21,6 +21,7 @@
 bool triComp(glm::vec2* p1, glm::vec2* p2);
 
 void printVec(glm::vec2& v);
+void printVec(glm::vec3& v);
 void printVec(glm::vec4& v);
 
 template<class T>

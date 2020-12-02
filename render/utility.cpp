@@ -10,6 +10,10 @@ void printVec(glm::vec2& v) {
 	std::cout << "[" << v.x << " " << v.y << "]";
 }
 
+void printVec(glm::vec3& v) {
+	std::cout << "[" << v.x << " " << v.y << " " << v.z << "]";
+}
+
 void printVec(glm::vec4& v) {
 	std::cout << "[" << v.x << " " << v.y <<  " " << v.z << " " << v.a << "]";
 }
