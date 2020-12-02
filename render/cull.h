@@ -4,6 +4,9 @@
 #include <glm/glm.hpp>
 #include <iostream>
 
+#include "models.h"
+#include <vector>
+
 #define BUFFER_WIDTH 32
 #define BUFFER_HEIGHT 32
 #define BLOCK_HEIGHT 8
@@ -39,3 +42,8 @@ struct DepthBuffer {
 
 extern DepthBuffer dBuffer;
 
+////////////////////////////////////////////////////////////
+
+
+
+bool shouldDraw(const Model3& m);

@@ -2,6 +2,7 @@
 #include "utility.h"
 #include <vector>
 #include <algorithm>
+#include "draw.h"
 
 DepthBuffer dBuffer;
 
@@ -165,4 +166,141 @@ void DepthBuffer::print() {
 	}
 }
 
+////////////////////////////////////////////////////////////
 
+bool windowClip(const glm::vec3 &p1, const glm::vec3 &p2) {
+	//LRDUBF
+	#define CLIP_CODE(p) \
+		((p.x <= -1.0f) << 5) | ((p.x >= 1.0f) << 4) | ((p.y <= -1.0f) << 3) | ((p.y >= 1.0f) << 2) | ((p.z <= -1.0f) << 1) | ((p.z >= 1.0f))
+
+	int code1 = CLIP_CODE(p1);
+	int code2 = CLIP_CODE(p2);
+
+	if (code1 != 0 && code2 != 0 && (code1 & code2) != 0) {
+		return true;
+	}
+}
+
+bool triangleOutsideWindow(const glm::vec4 &p1, const glm::vec4 &p2, const glm::vec4 &p3) { //might not really work
+	glm::vec3 t1(p1);
+	glm::vec3 t2(p2);
+	glm::vec3 t3(p3);
+
+	return windowClip(t1, t2) && windowClip(t1, t3) && windowClip(t2, t3);
+}
+
+void transformBoundingBox(const Model3 &m, std::vector<glm::vec2> &square, bool &inside) {
+	square.clear();
+
+	GLfloat minX = std::numeric_limits<GLfloat>::max();
+	GLfloat maxX = std::numeric_limits<GLfloat>::min();
+
+	GLfloat minY = std::numeric_limits<GLfloat>::max();
+	GLfloat maxY = std::numeric_limits<GLfloat>::min();
+
+	GLfloat minZ = std::numeric_limits<GLfloat>::max();
+	GLfloat maxZ = std::numeric_limits<GLfloat>::min();
+
+	inside = false;
+
+	std::vector<GLfloat> testData;
+
+	testData.push_back(-0.5f);
+	testData.push_back(0.0f);
+	testData.push_back(0.0f);
+
+	testData.push_back(0.5f);
+	testData.push_back(0.0f);
+	testData.push_back(0.0f);
+
+	testData.push_back(0.0f);
+	testData.push_back(0.5f);
+	testData.push_back(0.0f);
+
+
+	WHITE();
+	for (auto it = m.boxData.begin(); it != m.boxData.end();) {
+		glm::vec4 p1(*it++, *it++, *it++, 1.0f);
+		glm::vec4 p2(*it++, *it++, *it++, 1.0f);
+		glm::vec4 p3(*it++, *it++, *it++, 1.0f);
+
+		p1 = view * m.modelMatrix * p1;
+		p2 = view * m.modelMatrix * p2;
+		p3 = view * m.modelMatrix * p3;
+		p1 /= p1.a;
+		p2 /= p2.a;
+		p3 /= p3.a;
+		std::vector<int> sign1;
+		sign1.push_back(SIGN(p1.x));
+		sign1.push_back(SIGN(p1.y));
+		sign1.push_back(SIGN(p2.x));
+		sign1.push_back(SIGN(p2.y));
+		sign1.push_back(SIGN(p3.x));
+		sign1.push_back(SIGN(p3.y));
+
+		p1 = project * p1;
+		p2 = project * p2;
+		p3 = project * p3;
+		p1 /= p1.a;
+		p2 /= p2.a;
+		p3 /= p3.a;
+		std::vector<int> sign2;
+		sign2.push_back(SIGN(p1.x));
+		sign2.push_back(SIGN(p1.y));
+		sign2.push_back(SIGN(p2.x));
+		sign2.push_back(SIGN(p2.y));
+		sign2.push_back(SIGN(p3.x));
+		sign2.push_back(SIGN(p3.y));
+
+		if (sign1 != sign2) {
+			RED();
+			continue;
+		}
+
+		square.push_back(glm::vec2(p1));
+		square.push_back(glm::vec2(p2));
+		square.push_back(glm::vec2(p3));
+
+		#define INSIDE(p) \
+			((abs(p.x) < 1.0f) & (abs(p.y) < 1.0f) & (abs(p.z) < 1.0f))
+
+		inside |= INSIDE(p1) | INSIDE(p2) | INSIDE(p3);
+	}
+
+	std::cout << "Inside " << inside << std::endl;
+}
+
+bool shouldDraw(const Model3& m) {
+	bool reject = false;
+
+	//Transform bounding box into bounding square
+	std::vector<glm::vec2> square;
+	bool inside;
+	transformBoundingBox(m, square, inside);
+
+	if (!inside) {
+		return false;
+	}
+
+
+	dBuffer.reset();
+	for (auto it = square.begin(); it != square.end();) {
+		glm::vec2& p1 = *it;
+		it++;
+		glm::vec2& p2 = *it;
+		it++;
+		glm::vec2& p3 = *it;
+		it++;
+
+		rasterize(p1, p2, p3);
+	}
+
+	//rasterize(square[0], square[1], square[2]);
+	//rasterize(square[3], square[4], square[5]);
+	dBuffer.print();
+	std::cout << std::endl;
+
+
+
+	return true;
+}

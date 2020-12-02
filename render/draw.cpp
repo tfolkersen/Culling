@@ -1,5 +1,6 @@
 #include "draw.h"
 #include "control.h"
+#include "cull.h"
 #include <ctime>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
@@ -199,7 +200,12 @@ void render2() {
 	//drawModel3(sceneModels[0]);
 
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
-		drawModel3(*it);
+		if (shouldDraw(*it)) {
+			drawModel3(*it);
+			break;
+		} else {
+			std::cout << "skipped" << std::endl;
+		}
 	}
 
 	model = glm::mat4();
@@ -214,4 +220,6 @@ double distSquaredToCamera(const Model3 &m) {
 	glm::vec3 p = glm::vec3(transformed / transformed.a);
 	return ((double)p.x * p.x) + ((double)p.y * p.y) + ((double)p.z * p.z);
 }
+
+
 

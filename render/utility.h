@@ -9,10 +9,19 @@
 
 
 #define PI 3.141592654
+#define PRINT(x) \
+	std::cout << x << std::endl
+#define SIGN(x) \
+	(x > 0)
+
+#define WHITE() std::cout << "\033[1;37m"
+#define RED() std::cout << "\033[1;31m"
+
 
 bool triComp(glm::vec2* p1, glm::vec2* p2);
 
 void printVec(glm::vec2& v);
+void printVec(glm::vec4& v);
 
 template<class T>
 void printPair(std::pair<T, T>& p);
