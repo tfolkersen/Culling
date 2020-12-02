@@ -189,34 +189,13 @@ bool triangleOutsideWindow(const glm::vec4 &p1, const glm::vec4 &p2, const glm::
 	return windowClip(t1, t2) && windowClip(t1, t3) && windowClip(t2, t3);
 }
 
-void transformBoundingBox(const Model3 &m, std::vector<glm::vec2> &square, bool &inside) {
+void transformBoundingBox(const Model3 &m, std::vector<glm::vec2> &square, bool &inside, GLfloat &minZ, GLfloat &maxZ) {
 	square.clear();
 
-	GLfloat minX = std::numeric_limits<GLfloat>::max();
-	GLfloat maxX = std::numeric_limits<GLfloat>::min();
-
-	GLfloat minY = std::numeric_limits<GLfloat>::max();
-	GLfloat maxY = std::numeric_limits<GLfloat>::min();
-
-	GLfloat minZ = std::numeric_limits<GLfloat>::max();
-	GLfloat maxZ = std::numeric_limits<GLfloat>::min();
+	minZ = std::numeric_limits<GLfloat>::max();
+	maxZ = std::numeric_limits<GLfloat>::min();
 
 	inside = false;
-
-	std::vector<GLfloat> testData;
-
-	testData.push_back(-0.5f);
-	testData.push_back(0.0f);
-	testData.push_back(0.0f);
-
-	testData.push_back(0.5f);
-	testData.push_back(0.0f);
-	testData.push_back(0.0f);
-
-	testData.push_back(0.0f);
-	testData.push_back(0.5f);
-	testData.push_back(0.0f);
-
 
 	WHITE();
 	for (auto it = m.boxData.begin(); it != m.boxData.end();) {
@@ -261,6 +240,16 @@ void transformBoundingBox(const Model3 &m, std::vector<glm::vec2> &square, bool 
 		square.push_back(glm::vec2(p2));
 		square.push_back(glm::vec2(p3));
 
+		minZ = std::min(minZ, p1.z);
+		maxZ = std::min(maxZ, p1.z);
+
+		minZ = std::min(minZ, p2.z);
+		maxZ = std::min(maxZ, p2.z);
+
+		minZ = std::min(minZ, p3.z);
+		maxZ = std::min(maxZ, p3.z);
+
+
 		#define INSIDE(p) \
 			((abs(p.x) < 1.0f) & (abs(p.y) < 1.0f) & (abs(p.z) < 1.0f))
 
@@ -276,12 +265,13 @@ bool shouldDraw(const Model3& m) {
 	//Transform bounding box into bounding square
 	std::vector<glm::vec2> square;
 	bool inside;
-	transformBoundingBox(m, square, inside);
+	GLfloat minZ;
+	GLfloat maxZ;
+	transformBoundingBox(m, square, inside, minZ, maxZ);
 
 	if (!inside) {
 		return false;
 	}
-
 
 	dBuffer.reset();
 	for (auto it = square.begin(); it != square.end();) {
@@ -294,9 +284,6 @@ bool shouldDraw(const Model3& m) {
 
 		rasterize(p1, p2, p3);
 	}
-
-	//rasterize(square[0], square[1], square[2]);
-	//rasterize(square[3], square[4], square[5]);
 	dBuffer.print();
 	std::cout << std::endl;
 
