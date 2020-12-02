@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "draw.h"
+#include <cmath>
 
 DepthBuffer dBuffer;
 
@@ -264,10 +265,10 @@ bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat m
 	maxY = minP.y;
 
 	int iStart = std::max(((int)minY) / BLOCK_HEIGHT, 0);
-	int iEnd = std::min(((int)maxY) / BLOCK_HEIGHT, (int)dBuffer.heightB - 1);
+	int iEnd = std::min((int)ceil(maxY / (GLfloat) BLOCK_HEIGHT), (int)dBuffer.heightB - 1);
 
 	int jStart = std::max(((int)minX) / 32, 0); 
-	int jEnd = std::min(((int)maxX) / 32, (int)dBuffer.widthB - 1);
+	int jEnd = std::min((int)ceil(maxX / 32.0f), (int)dBuffer.widthB - 1);
 
 	std::cout << "indices " << iStart << " " << iEnd << " " << jStart << " " << jEnd << std::endl;
 

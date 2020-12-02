@@ -207,6 +207,7 @@ void render2() {
 			std::cout << "skipped" << std::endl;
 		}
 	}
+	//dBuffer.print();
 
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));
