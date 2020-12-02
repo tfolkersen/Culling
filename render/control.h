@@ -17,8 +17,12 @@
 #define KEY_SWAP_MODELS GLFW_KEY_F //Toggle model rendering modes (normal/occluder mesh/bounding box)
 #define KEY_SPEED GLFW_KEY_LEFT_SHIFT //Move fast
 
-#define CAMERA_SPEED_DEFAULT 0.05f
-#define CAMERA_SPEED_FAST 0.10f;
+//#define CAMERA_SPEED_DEFAULT 0.05f
+//#define CAMERA_SPEED_FAST 0.10f;
+
+#define CAMERA_SPEED_DEFAULT 0.3f
+#define CAMERA_SPEED_FAST 0.6f;
+
 
 #define MOUSE_SENSITIVITY 0.001 / 1.6 //How fast to rotate the camera with mouse movement
 

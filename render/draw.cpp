@@ -209,7 +209,7 @@ void render2() {
 	}
 	//dBuffer.print();
 
-	sceneModels[0].modelMatrix = glm::rotate(sceneModels[0].modelMatrix, 0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
+	//sceneModels[0].modelMatrix = glm::rotate(sceneModels[0].modelMatrix, 0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));

@@ -8,7 +8,7 @@
 #include <vector>
 
 #define BUFFER_WIDTH 32*4
-#define BUFFER_HEIGHT 32*2
+#define BUFFER_HEIGHT 32
 #define BLOCK_HEIGHT 8
 
 uint32_t line(uint32_t e0, uint32_t e1, uint32_t e2, uint32_t o0, uint32_t o1, uint32_t o2);

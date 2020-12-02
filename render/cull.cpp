@@ -209,6 +209,19 @@ void transformBoundingBox(const Model3 &m, GLfloat &minX, GLfloat &maxX, GLfloat
 		pointCount++;
 		glm::vec4 p1(*it++, *it++, *it++, 1.0f);
 
+		glm::mat4 rot = glm::rotate(glm::mat4(), (GLfloat)-PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, -1.0f));
+
+		/*
+			I have no idea why, but this scaling and rotation is needed, otherwise the rasterization shows a different view of the object...
+		*/
+		p1 =  rot * scale * p1;
+		p1 /= p1.w;
+
+
+
+
+
 		glm::vec4 p2 = view * m.modelMatrix * p1;
 		p2 /= p2.w;
 		std::vector<int> sign1;
@@ -277,14 +290,14 @@ bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat m
 		for (int j = jStart; j <= jEnd; j++) {
 			Block& b = dBuffer.getBlock(j, i);
 
-			if (b.reference >= minZ) {
-				return true;
-			}
+//			if (b.reference >= minZ) {
+//				return true;
+//			}
 
-			//for (int k = 0; k < BLOCK_HEIGHT; k++) {
-			//	uint32_t result = ~0;
-			//	b.bits[k] = result;
-			//}
+			for (int k = 0; k < BLOCK_HEIGHT; k++) {
+				uint32_t result = ~0;
+				b.bits[k] = result;
+			}
 		}
 	}
 	return false;
@@ -430,25 +443,26 @@ bool shouldDraw(const Model3& m) {
 	transformBoundingBox(m, minX, maxX, minY, maxY, minZ, maxZ, badPoints, allBadPoints);
 	std::cout << minZ;
 
-	if (allBadPoints) {
-		return false;
-	}
-
-	if (badPoints) {
-		return true;
-	}
+//	if (allBadPoints) {
+//		return false;
+//	}
+//
+//	if (badPoints) {
+//		return true;
+//	}
 
 	//Depth test
-	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
-
 
 	dBuffer.reset();
-	updateDepthBuffer(m, maxZ);
+	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
 	dBuffer.print();
+
+	updateDepthBuffer(m, maxZ);
 	std::cout << std::endl;
 
 	
 
+	return true;
 
 
 	return visible;
