@@ -189,8 +189,8 @@ bool triangleOutsideWindow(const glm::vec4 &p1, const glm::vec4 &p2, const glm::
 	return windowClip(t1, t2) && windowClip(t1, t3) && windowClip(t2, t3);
 }
 
-void transformBoundingBox(const Model3 &m, std::vector<glm::vec2> &square, bool &inside, GLfloat &minZ, GLfloat &maxZ) {
-	square.clear();
+void transformBoundingBox(const Model3 &m, std::vector<glm::vec2> &box, bool &inside, GLfloat &minZ, GLfloat &maxZ) {
+	box.clear();
 
 	minZ = std::numeric_limits<GLfloat>::max();
 	maxZ = std::numeric_limits<GLfloat>::min();
@@ -236,9 +236,9 @@ void transformBoundingBox(const Model3 &m, std::vector<glm::vec2> &square, bool 
 			continue;
 		}
 
-		square.push_back(glm::vec2(p1));
-		square.push_back(glm::vec2(p2));
-		square.push_back(glm::vec2(p3));
+		box.push_back(glm::vec2(p1));
+		box.push_back(glm::vec2(p2));
+		box.push_back(glm::vec2(p3));
 
 		minZ = std::min(minZ, p1.z);
 		maxZ = std::min(maxZ, p1.z);
@@ -263,31 +263,33 @@ bool shouldDraw(const Model3& m) {
 	bool reject = false;
 
 	//Transform bounding box into bounding square
-	std::vector<glm::vec2> square;
+	std::vector<glm::vec2> box;
 	bool inside;
 	GLfloat minZ;
 	GLfloat maxZ;
-	transformBoundingBox(m, square, inside, minZ, maxZ);
+	transformBoundingBox(m, box, inside, minZ, maxZ);
 
+	//Frustum cull
 	if (!inside) {
 		return false;
 	}
 
-	dBuffer.reset();
-	for (auto it = square.begin(); it != square.end();) {
-		glm::vec2& p1 = *it;
-		it++;
-		glm::vec2& p2 = *it;
-		it++;
-		glm::vec2& p3 = *it;
-		it++;
+	//Depth test
 
-		rasterize(p1, p2, p3);
-	}
-	dBuffer.print();
-	std::cout << std::endl;
+	
+	
 
 
 
 	return true;
+
+	//Print box
+	/*
+	dBuffer.reset();
+	for (auto it = box.begin(); it != box.end();) {
+		rasterize(*it++, *it++, *it++);
+	}
+	dBuffer.print();
+	std::cout << std::endl;
+	*/
 }
