@@ -167,11 +167,11 @@ void makeScene2() {
 	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
 
 	
-	office = parseModel3("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj");
-	office.modelMatrix = glm::mat4();
-	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(-1.0f, 0.5f, -7.0f));
-	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
-	sceneModels.push_back(office);
+//	office = parseModel3("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj");
+//	office.modelMatrix = glm::mat4();
+//	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(-1.0f, 0.5f, -7.0f));
+//	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+//	sceneModels.push_back(office);
 
 
 	office = parseModel3("models/office/main.obj", 0.5f, 0.2f, 1.0f, "models/office/occluder.obj", "models/office/box.obj");
@@ -199,10 +199,10 @@ void render2() {
 	std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
 	//drawModel3(sceneModels[0]);
 
+	dBuffer.reset();
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
 		if (shouldDraw(*it)) {
 			drawModel3(*it);
-			break;
 		} else {
 			std::cout << "skipped" << std::endl;
 		}

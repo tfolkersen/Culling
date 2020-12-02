@@ -124,7 +124,9 @@ void Block::reset() {
 	for (int i = 0; i < BLOCK_HEIGHT; i++) {
 		bits[i] = 0;
 	}
-	depth = 1.0f;
+	reference = 1.0f;
+	working = 1.0f;
+
 }
 
 DepthBuffer::DepthBuffer() {
@@ -189,99 +191,127 @@ bool triangleOutsideWindow(const glm::vec4 &p1, const glm::vec4 &p2, const glm::
 	return windowClip(t1, t2) && windowClip(t1, t3) && windowClip(t2, t3);
 }
 
-void transformBoundingBox(const Model3 &m, std::vector<glm::vec2> &box, bool &inside, GLfloat &minZ, GLfloat &maxZ) {
-	box.clear();
+void transformBoundingBox(const Model3 &m, GLfloat &minX, GLfloat &maxX, GLfloat &minY, GLfloat &maxY, GLfloat &minZ, GLfloat &maxZ, bool &badPoints, bool &allBadPoints) {
+	minX = std::numeric_limits<GLfloat>::max();
+	maxX = std::numeric_limits<GLfloat>::min();
+
+	minY = std::numeric_limits<GLfloat>::max();
+	maxY = std::numeric_limits<GLfloat>::min();
 
 	minZ = std::numeric_limits<GLfloat>::max();
 	maxZ = std::numeric_limits<GLfloat>::min();
 
-	inside = false;
-
-	WHITE();
+	size_t pointCount = 0;
+	size_t badPointCount = 0;
 	for (auto it = m.boxData.begin(); it != m.boxData.end();) {
+		pointCount++;
 		glm::vec4 p1(*it++, *it++, *it++, 1.0f);
-		glm::vec4 p2(*it++, *it++, *it++, 1.0f);
-		glm::vec4 p3(*it++, *it++, *it++, 1.0f);
 
-		p1 = view * m.modelMatrix * p1;
-		p2 = view * m.modelMatrix * p2;
-		p3 = view * m.modelMatrix * p3;
-		p1 /= p1.a;
-		p2 /= p2.a;
-		p3 /= p3.a;
+		glm::vec4 p2 = view * m.modelMatrix * p1;
+		p2 /= p2.w;
 		std::vector<int> sign1;
-		sign1.push_back(SIGN(p1.x));
-		sign1.push_back(SIGN(p1.y));
 		sign1.push_back(SIGN(p2.x));
 		sign1.push_back(SIGN(p2.y));
-		sign1.push_back(SIGN(p3.x));
-		sign1.push_back(SIGN(p3.y));
 
-		p1 = project * p1;
-		p2 = project * p2;
-		p3 = project * p3;
-		p1 /= p1.a;
-		p2 /= p2.a;
-		p3 /= p3.a;
+		glm::vec4 p3 = project * view * m.modelMatrix * p1;
+		p3 /= p3.w;
 		std::vector<int> sign2;
-		sign2.push_back(SIGN(p1.x));
-		sign2.push_back(SIGN(p1.y));
-		sign2.push_back(SIGN(p2.x));
-		sign2.push_back(SIGN(p2.y));
 		sign2.push_back(SIGN(p3.x));
 		sign2.push_back(SIGN(p3.y));
 
 		if (sign1 != sign2) {
-			RED();
-			continue;
+			badPointCount++;
 		}
 
-		box.push_back(glm::vec2(p1));
-		box.push_back(glm::vec2(p2));
-		box.push_back(glm::vec2(p3));
+		minX = std::min(minX, p3.x);
+		maxX = std::max(maxX, p3.x);
 
-		minZ = std::min(minZ, p1.z);
-		maxZ = std::min(maxZ, p1.z);
-
-		minZ = std::min(minZ, p2.z);
-		maxZ = std::min(maxZ, p2.z);
+		minY = std::min(minY, p3.y);
+		maxY = std::max(maxY, p3.y);
 
 		minZ = std::min(minZ, p3.z);
-		maxZ = std::min(maxZ, p3.z);
-
-
-		#define INSIDE(p) \
-			((abs(p.x) < 1.0f) & (abs(p.y) < 1.0f) & (abs(p.z) < 1.0f))
-
-		inside |= INSIDE(p1) | INSIDE(p2) | INSIDE(p3);
+		maxZ = std::max(maxZ, p3.z);
+		
 	}
 
-	std::cout << "Inside " << inside << std::endl;
+	minX = std::max(minX, -1.0f);
+	maxX = std::min(maxX, 1.0f);
+
+	minY = std::max(minY, -1.0f);
+	maxY = std::min(maxY, 1.0f);
+
+	minZ = std::max(minZ, -1.0f);
+	maxZ = std::min(maxZ, 1.0f);
+
+	badPoints = badPointCount > 0;
+	allBadPoints = (badPointCount == pointCount);
 }
+
+bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat minZ, GLfloat maxZ) {
+	std::cout << "coords " << minX << " " << maxX << " " << minY << " " << maxY << std::endl;
+
+
+	glm::vec2 minP(minX, minY);
+	glm::vec2 maxP(maxX, maxY);
+
+	convertVec(minP);
+	convertVec(maxP);
+
+	minX = minP.x;
+	maxX = maxP.x;
+
+	minY = maxP.y;
+	maxY = minP.y;
+
+	int iStart = std::max(((int)minY) / BLOCK_HEIGHT, 0);
+	int iEnd = std::min(((int)maxY) / BLOCK_HEIGHT, (int)dBuffer.heightB - 1);
+
+	int jStart = std::max(((int)minX) / 32, 0); 
+	int jEnd = std::min(((int)maxX) / 32, (int)dBuffer.widthB - 1);
+
+	std::cout << "indices " << iStart << " " << iEnd << " " << jStart << " " << jEnd << std::endl;
+
+	for (int i = iStart; i <= iEnd; i++) {
+		for (int j = jStart; j <= jEnd; j++) {
+			Block& b = dBuffer.getBlock(j, i);
+
+			if (b.reference >= minZ) {
+				return true;
+			}
+
+			//for (int k = 0; k < BLOCK_HEIGHT; k++) {
+			//	uint32_t result = ~0;
+			//	b.bits[k] = result;
+			//}
+		}
+	}
+	return false;
+}
+
 
 bool shouldDraw(const Model3& m) {
 	bool reject = false;
 
 	//Transform bounding box into bounding square
-	std::vector<glm::vec2> box;
-	bool inside;
-	GLfloat minZ;
-	GLfloat maxZ;
-	transformBoundingBox(m, box, inside, minZ, maxZ);
+	GLfloat minX, maxX, minY, maxY, minZ, maxZ;
+	bool badPoints, allBadPoints;
+	transformBoundingBox(m, minX, maxX, minY, maxY, minZ, maxZ, badPoints, allBadPoints);
+	std::cout << minZ;
 
-	//Frustum cull
-	if (!inside) {
+	if (allBadPoints) {
 		return false;
 	}
 
+	if (badPoints) {
+		return true;
+	}
+
 	//Depth test
-
-	
-	
+	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
 
 
 
-	return true;
+	return visible;
 
 	//Print box
 	/*

@@ -7,7 +7,7 @@
 #include "models.h"
 #include <vector>
 
-#define BUFFER_WIDTH 32
+#define BUFFER_WIDTH 32*3
 #define BUFFER_HEIGHT 32
 #define BLOCK_HEIGHT 8
 
@@ -17,7 +17,8 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3);
 
 struct Block {
 	uint32_t bits[BLOCK_HEIGHT];
-	GLfloat depth;
+	GLfloat reference;
+	GLfloat working;
 
 	void reset();
 };
