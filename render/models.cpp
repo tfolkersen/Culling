@@ -14,32 +14,34 @@ Model::Model(const Model &m) {
 
 
 
-Model3::Model3() {
+ModelCollection::ModelCollection() {
 }
 
 
-Model3::Model3(const Model3 &m) {
+ModelCollection::ModelCollection(const ModelCollection &m) {
 	this->main = m.main;
 	this->occluder = m.occluder;
 	this->box = m.box;
 	this->occluderData = m.occluderData;
 	this->boxData = m.boxData;
 	this->modelMatrix = m.modelMatrix;
+	this->marker = m.marker;
 }
 
 
 Model box;
 Model plant;
 Model cube;
-Model3 office;
+ModelCollection office;
 
-Model3 parseModel3(std::string mainFileName, GLfloat r, GLfloat g, GLfloat b, std::string occluderFileName, std::string boxFileName) {
-	Model3 m;
+ModelCollection parseModelCollection(std::string mainFileName, GLfloat r, GLfloat g, GLfloat b, std::string occluderFileName, std::string boxFileName, std::string markerFileName) {
+	ModelCollection m;
 
 	m.main = parseObj(mainFileName, r, g, b);
 	m.occluder = parseObj(occluderFileName, 1.0f, 0.0f, 0.0f, m.occluderData);
 	m.box = parseObj(boxFileName, 1.0f, 1.0f, 0.0f, m.boxData);
 	m.boxCenter = modelDataCenter(m.boxData);
+	m.marker = parseObj(markerFileName, 0.0f, 1.0f, 1.0f);
 
 	return m;
 }

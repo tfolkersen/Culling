@@ -5,6 +5,7 @@
 #include "draw.h"
 #include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
+#include "control.h"
 
 DepthBuffer dBuffer;
 
@@ -193,7 +194,7 @@ bool triangleOutsideWindow(const glm::vec4 &p1, const glm::vec4 &p2, const glm::
 	return windowClip(t1, t2) && windowClip(t1, t3) && windowClip(t2, t3);
 }
 
-void transformBoundingBox(const Model3 &m, GLfloat &minX, GLfloat &maxX, GLfloat &minY, GLfloat &maxY, GLfloat &minZ, GLfloat &maxZ, bool &badPoints, bool &allBadPoints) {
+void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX, GLfloat &minY, GLfloat &maxY, GLfloat &minZ, GLfloat &maxZ, bool &badPoints, bool &allBadPoints) {
 	minX = std::numeric_limits<GLfloat>::max();
 	maxX = std::numeric_limits<GLfloat>::min();
 
@@ -418,7 +419,7 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 
 
 
-void updateDepthBuffer(const Model3 &m, GLfloat maxZ) {
+void updateDepthBuffer(const ModelCollection &m, GLfloat maxZ) {
 
 	for (auto it = m.occluderData.begin(); it != m.occluderData.end();) {
 		glm::vec4 p1(*it++, *it++, *it++, 1.0f);
@@ -475,17 +476,19 @@ void updateDepthBuffer(const Model3 &m, GLfloat maxZ) {
 
 }
 
-bool shouldDraw(const Model3& m) {
+bool shouldDraw(const ModelCollection& m) {
 	//Transform bounding box into bounding square
 	GLfloat minX, maxX, minY, maxY, minZ, maxZ;
 	bool badPoints, allBadPoints;
 	transformBoundingBox(m, minX, maxX, minY, maxY, minZ, maxZ, badPoints, allBadPoints);
 
 	if (allBadPoints) {
+		std::cout << "all bad points " << currentFrame << std::endl;
 		return false;
 	}
 
 	if (badPoints) {
+		std::cout << "bad points " << currentFrame << std::endl;
 		return true;
 	}
 
@@ -493,6 +496,9 @@ bool shouldDraw(const Model3& m) {
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
 	updateDepthBuffer(m, maxZ);
 
+	if (!visible) {
+		std::cout << "Depth culling! " << currentFrame << std::endl;
+	}
 
 	return visible;
 

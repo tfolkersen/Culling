@@ -47,4 +47,4 @@ extern DepthBuffer dBuffer;
 
 
 
-bool shouldDraw(const Model3& m);
+bool shouldDraw(const ModelCollection& m);

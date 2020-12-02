@@ -20,7 +20,7 @@ struct Model {
 	Model(const Model& m);
 };
 
-struct Model3 {
+struct ModelCollection {
 	Model main;
 
 	Model occluder;
@@ -30,21 +30,23 @@ struct Model3 {
 	std::vector<GLfloat> boxData;
 	glm::vec3 boxCenter;
 
+	Model marker;
+
 	glm::mat4 modelMatrix;
 
-	Model3();
+	ModelCollection();
 
-	Model3(const Model3& m);
+	ModelCollection(const ModelCollection& m);
 };
 
 extern Model box;
 extern Model plant;
 extern Model cube;
-extern Model3 office;
+extern ModelCollection office;
 
 
 Model parseObj(std::string fileName, GLfloat r, GLfloat g, GLfloat b, std::vector<GLfloat>& posData = std::vector<GLfloat>());
 
-Model3 parseModel3(std::string mainFileName, GLfloat r, GLfloat g, GLfloat b, std::string occluderFileName, std::string boxFileName);
+ModelCollection parseModelCollection(std::string mainFileName, GLfloat r, GLfloat g, GLfloat b, std::string occluderFileName, std::string boxFileName, std::string markerFileName);
 
 glm::vec3 modelDataCenter(const std::vector<GLfloat>& data);

@@ -29,7 +29,7 @@ extern GLfloat cameraSpeed; //Camera movement per frame in any direction
 enum replayEnum {CONTROL, RECORD, PLAY};
 extern int replayMode;
 
-enum modelTypeEnum{MAIN = 0, OCCLUDER = 1, BOX = 2};
+enum modelTypeEnum{MAIN = 0, OCCLUDER = 1, BOX = 2, MARKER = 3};
 extern int drawModelType;
 
 extern std::string replayFileName;

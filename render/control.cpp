@@ -152,7 +152,7 @@ void handleGlobalInput() {
 	bool swapPress = keyPressed(KEY_SWAP_MODELS);
 	if (swapPress && !swappedLastFrame) {
 		swappedLastFrame = true;
-		drawModelType = (drawModelType + 1) % 3;
+		drawModelType = (drawModelType + 1) % 4;
 	}
 
 	if (!swapPress) {

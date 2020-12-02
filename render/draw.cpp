@@ -20,7 +20,7 @@ glm::mat4 normal;
 glm::mat4 view;
 glm::mat4 project;
 
-std::vector<Model3> sceneModels;
+std::vector<ModelCollection> sceneModels;
 
 
 void setMatrices() {
@@ -58,13 +58,15 @@ void drawModel(Model &m) {
 	glDrawArrays(GL_TRIANGLES, 0, m.nVerts);
 }
 
-void drawModel3(Model3 &m) {
+void drawModelCollection(ModelCollection &m) {
 	model = m.modelMatrix;
 	mvp = project * view * model;
 	if (drawModelType == OCCLUDER) {
 		drawModel(m.occluder);
 	} else if (drawModelType == BOX) {
 		drawModel(m.box);
+	} else if (drawModelType == MARKER) {
+		drawModel(m.marker);
 	} else {
 		drawModel(m.main);
 	}
@@ -116,7 +118,7 @@ void makeModels() {
 
 	plant = parseObj("models/banana_plant.obj", 0.3f, 1.0f, 0.0f);
 	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
-	office = parseModel3("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj");
+	office = parseModelCollection("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj", "models/office/marker.obj");
 }
 
 
@@ -153,7 +155,7 @@ void render() {
 
 	model = glm::mat4();
 	mvp = project * view * model;
-	drawModel3(office);
+	drawModelCollection(office);
 
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));
@@ -167,14 +169,14 @@ void makeScene2() {
 	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
 
 	
-	office = parseModel3("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj");
+	office = parseModelCollection("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj", "models/office/marker.obj");
 	office.modelMatrix = glm::mat4();
 	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(-1.0f, 0.5f, -7.0f));
-	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(2.0f, 2.0f, 0.5f));
 	sceneModels.push_back(office);
 
 
-	office = parseModel3("models/office/main.obj", 0.5f, 0.2f, 1.0f, "models/office/occluder.obj", "models/office/box.obj");
+	office = parseModelCollection("models/office/main.obj", 0.5f, 0.2f, 1.0f, "models/office/occluder.obj", "models/office/box.obj", "models/office/marker.obj");
 	office.modelMatrix = glm::mat4();
 	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(1.0f, 1.4f, 1.0f));
@@ -182,7 +184,7 @@ void makeScene2() {
 
 }
 
-bool modelComparator(const Model3& m1, const Model3& m2) {
+bool modelComparator(const ModelCollection& m1, const ModelCollection& m2) {
 	return distSquaredToCamera(m1) < distSquaredToCamera(m2);
 }
 
@@ -201,9 +203,9 @@ void render2() {
 	dBuffer.reset();
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
 		if (shouldDraw(*it)) {
-			drawModel3(*it);
+			drawModelCollection(*it);
 		} else {
-			std::cout << "skipped " << currentFrame << std::endl;
+			//std::cout << "skipped " << currentFrame << std::endl;
 		}
 	}
 
@@ -216,7 +218,7 @@ void render2() {
 	drawModel(cube);
 }
 
-double distSquaredToCamera(const Model3 &m) {
+double distSquaredToCamera(const ModelCollection &m) {
 	glm::vec4 transformed = view * m.modelMatrix * glm::vec4(m.boxCenter, 1.0f);
 	glm::vec3 p = glm::vec3(transformed / transformed.a);
 	return ((double)p.x * p.x) + ((double)p.y * p.y) + ((double)p.z * p.z);
