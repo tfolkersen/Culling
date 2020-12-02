@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "draw.h"
 #include <cmath>
+#include <glm/gtc/matrix_transform.hpp>
 
 DepthBuffer dBuffer;
 
@@ -395,9 +396,15 @@ void updateDepthBuffer(const Model3 &m, GLfloat maxZ) {
 		glm::vec4 p2(*it++, *it++, *it++, 1.0f);
 		glm::vec4 p3(*it++, *it++, *it++, 1.0f);
 
-		p1 = project * view * m.modelMatrix * p1;
-		p2 = project * view * m.modelMatrix * p2;
-		p3 = project * view * m.modelMatrix * p3;
+		glm::mat4 rot = glm::rotate(glm::mat4(), (GLfloat)-PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, -1.0f));
+
+		/*
+			I have no idea why, but this scaling and rotation is needed, otherwise the rasterization shows a different view of the object...
+		*/
+		p1 = project * view * m.modelMatrix * rot * scale * p1;
+		p2 = project * view * m.modelMatrix * rot * scale * p2;
+		p3 = project * view * m.modelMatrix * rot * scale * p3;
 
 		p1 /= p1.w;
 		p2 /= p2.w;
@@ -405,9 +412,9 @@ void updateDepthBuffer(const Model3 &m, GLfloat maxZ) {
 
 
 
-		glm::vec2 t1(p1);
-		glm::vec2 t2(p2);
-		glm::vec2 t3(p3);
+		glm::vec2 t1(p1.x, p1.y);
+		glm::vec2 t2(p2.x, p2.y);
+		glm::vec2 t3(p3.x, p3.y);
 
 		rasterize(t1, t2, t3);
 	}
