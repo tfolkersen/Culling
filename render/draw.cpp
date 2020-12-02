@@ -11,7 +11,7 @@ GLFWwindow* window = NULL;
 GLuint u_LightPos, u_LightColor, u_AmbientLight, u_MvpMat, u_ModelMat, u_NormalMat;
 
 glm::vec3 lightPos(6.0f, 6.0f, 0.0f);
-glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+glm::vec3 lightColor(2.0f, 2.0f, 2.0f);
 glm::vec3 ambientLight(0.3f, 0.3f, 0.3f);
 
 glm::mat4 mvp;
@@ -171,7 +171,7 @@ void makeScene2() {
 	
 	office = parseModelCollection("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box2.obj", "models/office/marker.obj");
 	office.modelMatrix = glm::mat4();
-	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(-1.0f, 0.5f, -7.0f));
+	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(-1.0f, 0.5f, -12.0f));
 	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(2.0f, 2.0f, 0.5f));
 	sceneModels.push_back(office);
 
