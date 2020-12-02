@@ -415,28 +415,51 @@ void updateDepthBuffer(const Model3 &m, GLfloat maxZ) {
 		/*
 			I have no idea why, but this scaling and rotation is needed, otherwise the rasterization shows a different view of the object...
 		*/
-		p1 = project * view * m.modelMatrix * rot * scale * p1;
-		p2 = project * view * m.modelMatrix * rot * scale * p2;
-		p3 = project * view * m.modelMatrix * rot * scale * p3;
-
+		p1 = view * m.modelMatrix * rot * scale * p1;
+		p2 = view * m.modelMatrix * rot * scale * p2;
+		p3 = view * m.modelMatrix * rot * scale * p3;
 		p1 /= p1.w;
 		p2 /= p2.w;
 		p3 /= p3.w;
 
+		std::vector<int> signs1;
+		signs1.push_back(SIGN(p1.x));
+		signs1.push_back(SIGN(p1.y));
+		signs1.push_back(SIGN(p2.x));
+		signs1.push_back(SIGN(p2.y));
+		signs1.push_back(SIGN(p3.x));
+		signs1.push_back(SIGN(p3.y));
 
+		p1 = project * p1;
+		p2 = project * p2;
+		p3 = project * p3;
+		p1 /= p1.w;
+		p2 /= p2.w;
+		p3 /= p3.w;
+
+		std::vector<int> signs2;
+		signs2.push_back(SIGN(p1.x));
+		signs2.push_back(SIGN(p1.y));
+		signs2.push_back(SIGN(p2.x));
+		signs2.push_back(SIGN(p2.y));
+		signs2.push_back(SIGN(p3.x));
+		signs2.push_back(SIGN(p3.y));
+
+
+		if (signs1 != signs2) {
+			continue;
+		}
 
 		glm::vec2 t1(p1.x, p1.y);
 		glm::vec2 t2(p2.x, p2.y);
 		glm::vec2 t3(p3.x, p3.y);
 
-		rasterize(t1, t2, t3);
+		renderIntoDepthBuffer(t1, t2, t3, maxZ);
 	}
 
 }
 
 bool shouldDraw(const Model3& m) {
-	bool reject = false;
-
 	//Transform bounding box into bounding square
 	GLfloat minX, maxX, minY, maxY, minZ, maxZ;
 	bool badPoints, allBadPoints;
@@ -444,11 +467,11 @@ bool shouldDraw(const Model3& m) {
 	std::cout << minZ;
 
 	if (allBadPoints) {
-		return false;
+		//return false;
 	}
 
 	if (badPoints) {
-		return true;
+		//return true;
 	}
 
 	//Depth test
@@ -456,21 +479,11 @@ bool shouldDraw(const Model3& m) {
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
 
 
+	dBuffer.reset();
 	updateDepthBuffer(m, maxZ);
-
-	
-
+	dBuffer.print();
 
 
 	return visible;
 
-	//Print box
-	/*
-	dBuffer.reset();
-	for (auto it = box.begin(); it != box.end();) {
-		rasterize(*it++, *it++, *it++);
-	}
-	dBuffer.print();
-	std::cout << std::endl;
-	*/
 }
