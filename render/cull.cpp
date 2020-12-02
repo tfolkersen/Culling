@@ -488,8 +488,8 @@ bool shouldDraw(const ModelCollection& m) {
 	}
 
 	if (badPoints) {
-		std::cout << "bad points " << currentFrame << std::endl;
-		return true;
+	//	std::cout << "bad points " << currentFrame << std::endl;
+	//	return true;
 	}
 
 	//Depth test

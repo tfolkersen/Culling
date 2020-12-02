@@ -118,7 +118,7 @@ void makeModels() {
 
 	plant = parseObj("models/banana_plant.obj", 0.3f, 1.0f, 0.0f);
 	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
-	office = parseModelCollection("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj", "models/office/marker.obj");
+	office = parseModelCollection("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box2.obj", "models/office/marker.obj");
 }
 
 
@@ -169,14 +169,14 @@ void makeScene2() {
 	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
 
 	
-	office = parseModelCollection("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box.obj", "models/office/marker.obj");
+	office = parseModelCollection("models/office/main.obj", 0.41f, 0.2f, 0.0f, "models/office/occluder.obj", "models/office/box2.obj", "models/office/marker.obj");
 	office.modelMatrix = glm::mat4();
 	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(-1.0f, 0.5f, -7.0f));
 	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(2.0f, 2.0f, 0.5f));
 	sceneModels.push_back(office);
 
 
-	office = parseModelCollection("models/office/main.obj", 0.5f, 0.2f, 1.0f, "models/office/occluder.obj", "models/office/box.obj", "models/office/marker.obj");
+	office = parseModelCollection("models/office/main.obj", 0.5f, 0.2f, 1.0f, "models/office/occluder.obj", "models/office/box2.obj", "models/office/marker.obj");
 	office.modelMatrix = glm::mat4();
 	office.modelMatrix = glm::translate(office.modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 	office.modelMatrix = glm::scale(office.modelMatrix, glm::vec3(1.0f, 1.4f, 1.0f));
