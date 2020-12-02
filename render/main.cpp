@@ -68,8 +68,6 @@ void init() {
 }
 
 
-
-
 int main() {
 
 	if (glfwInit() != GL_TRUE) {

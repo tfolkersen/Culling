@@ -290,14 +290,14 @@ bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat m
 		for (int j = jStart; j <= jEnd; j++) {
 			Block& b = dBuffer.getBlock(j, i);
 
-//			if (b.reference >= minZ) {
-//				return true;
-//			}
-
-			for (int k = 0; k < BLOCK_HEIGHT; k++) {
-				uint32_t result = ~0;
-				b.bits[k] = result;
+			if (b.reference >= minZ) {
+				return true;
 			}
+
+			//for (int k = 0; k < BLOCK_HEIGHT; k++) {
+			//	uint32_t result = ~0;
+			//	b.bits[k] = result;
+			//}
 		}
 	}
 	return false;
@@ -443,26 +443,23 @@ bool shouldDraw(const Model3& m) {
 	transformBoundingBox(m, minX, maxX, minY, maxY, minZ, maxZ, badPoints, allBadPoints);
 	std::cout << minZ;
 
-//	if (allBadPoints) {
-//		return false;
-//	}
-//
-//	if (badPoints) {
-//		return true;
-//	}
+	if (allBadPoints) {
+		return false;
+	}
+
+	if (badPoints) {
+		return true;
+	}
 
 	//Depth test
 
-	dBuffer.reset();
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
-	dBuffer.print();
+
 
 	updateDepthBuffer(m, maxZ);
-	std::cout << std::endl;
 
 	
 
-	return true;
 
 
 	return visible;
