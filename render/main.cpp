@@ -71,6 +71,7 @@ void init() {
 
 
 int main() {
+
 	if (glfwInit() != GL_TRUE) {
 		std::cerr << "Failed to init glfw" << std::endl;
 		return -1;

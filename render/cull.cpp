@@ -289,6 +289,130 @@ bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat m
 	return false;
 }
 
+void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat maxZ) {
+	fixTriangle(t1, t2, t3);
+
+	GLfloat cx = (t1.x + t2.x + t3.x) / 3.0f;
+	GLfloat cy = (t1.y + t2.y + t3.y) / 3.0f;
+	glm::vec2 center(cx, cy);
+
+	std::vector<glm::vec2*> ps;
+	ps.push_back(&t1);
+	ps.push_back(&t2);
+	ps.push_back(&t3);
+	std::sort(ps.begin(), ps.end(), triComp);
+
+	glm::vec2& p1 = *ps[0];
+	glm::vec2& p2 = *ps[1];
+	glm::vec2& p3 = *ps[2];
+
+	glm::vec2 l1 = p2 - p1;
+	glm::vec2 l2 = p3 - p1;
+	glm::vec2 l3 = p3 - p2;
+
+	glm::vec2 n1(l1.y, -l1.x);
+	glm::vec2 n2(l2.y, -l2.x);
+	glm::vec2 n3(l3.y, -l3.x);
+
+	//true if left is outside
+	bool o1 = glm::dot(n1, (center - p1)) < 0;
+	bool o2 = glm::dot(n2, (center - p1)) < 0;
+	bool o3 = glm::dot(n3, (center - p2)) < 0;
+	uint32_t mask1 = o1 ? 0 : ~0;
+	uint32_t mask2 = o2 ? 0 : ~0;
+	uint32_t mask3 = o3 ? 0 : ~0;
+
+	glm::vec2 f1 = p1 + ((1.0f - p1.y) / l1.y) * l1;
+	glm::vec2 f2 = p1 + ((1.0f - p1.y) / l2.y) * l2;
+	glm::vec2 f3 = p2 + ((1.0f - p2.y) / l3.y) * l3;
+
+	convertVec(f1);
+	convertVec(f2);
+	convertVec(f3);
+	convertVec(p1);
+	convertVec(p2);
+	convertVec(p3);
+	l1 = p2 - p1;
+	l2 = p3 - p1;
+	l3 = p3 - p2;
+	GLfloat s1 = l1.x / l1.y;
+	GLfloat s2 = l2.x / l2.y;
+	GLfloat s3 = l3.x / l3.y;
+
+
+	//std::cout << "Slope: " << s1 << " " << s2 << " " << s3 << std::endl;
+	GLfloat minY = std::min(p1.y, std::min(p2.y, p3.y));
+	GLfloat maxY = std::max(p1.y, std::max(p2.y, p3.y));
+	GLfloat minX = std::min(p1.x, std::min(p2.x, p3.x));
+	GLfloat maxX = std::max(p1.x, std::max(p2.x, p3.x));
+
+	int iStart = std::max(((int)minY) / BLOCK_HEIGHT, 0);
+	int iEnd = std::min(((int)maxY) / BLOCK_HEIGHT, (int)dBuffer.heightB - 1);
+
+	int jStart = std::max(((int)minX) / 32, 0);
+	int jEnd = std::min(((int)maxX) / 32, (int)dBuffer.widthB - 1);
+
+
+	for (int i = iStart; i <= iEnd; i++) {
+		int scanBase = i * BLOCK_HEIGHT;
+
+		GLfloat e1f[BLOCK_HEIGHT];
+		GLfloat e2f[BLOCK_HEIGHT];
+		GLfloat e3f[BLOCK_HEIGHT];
+
+		e1f[0] = f1.x + (GLfloat)scanBase * s1;
+		e2f[0] = f2.x + (GLfloat)scanBase * s2;
+		e3f[0] = f3.x + (GLfloat)scanBase * s3;
+
+		for (int r = 1; r < BLOCK_HEIGHT; r++) {
+			e1f[r] = e1f[r - 1] + s1;
+			e2f[r] = e2f[r - 1] + s2;
+			e3f[r] = e3f[r - 1] + s3;
+		}
+
+		for (int j = jStart; j <= jEnd; j++) {
+			Block& b = dBuffer.getBlock(j, i);
+
+			for (int k = 0; k < BLOCK_HEIGHT; k++) {
+				//These lines are important
+				uint32_t e1 = std::max(0.0f, e1f[k] - j * 32.0f);
+				uint32_t e2 = std::max(0.0f, e2f[k] - j * 32.0f);
+				uint32_t e3 = std::max(0.0f, e3f[k] - j * 32.0f);
+
+				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
+				b.bits[k] |= result;
+			}
+		}
+	}
+}
+
+
+
+void updateDepthBuffer(const Model3 &m, GLfloat maxZ) {
+
+	for (auto it = m.occluderData.begin(); it != m.occluderData.end();) {
+		glm::vec4 p1(*it++, *it++, *it++, 1.0f);
+		glm::vec4 p2(*it++, *it++, *it++, 1.0f);
+		glm::vec4 p3(*it++, *it++, *it++, 1.0f);
+
+		p1 = project * view * m.modelMatrix * p1;
+		p2 = project * view * m.modelMatrix * p2;
+		p3 = project * view * m.modelMatrix * p3;
+
+		p1 /= p1.w;
+		p2 /= p2.w;
+		p3 /= p3.w;
+
+
+
+		glm::vec2 t1(p1);
+		glm::vec2 t2(p2);
+		glm::vec2 t3(p3);
+
+		rasterize(t1, t2, t3);
+	}
+
+}
 
 bool shouldDraw(const Model3& m) {
 	bool reject = false;
@@ -309,6 +433,14 @@ bool shouldDraw(const Model3& m) {
 
 	//Depth test
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
+
+
+	dBuffer.reset();
+	updateDepthBuffer(m, maxZ);
+	dBuffer.print();
+	std::cout << std::endl;
+
+	
 
 
 
