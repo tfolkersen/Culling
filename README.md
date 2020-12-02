@@ -17,3 +17,7 @@ by user "yesid316"
 Office building
 https://www.cgtrader.com/free-3d-models/exterior/office/free-office-building
 by user "lukass12"
+
+Implements "masked occlusion culling" as proposed in the paper "Masked Software Occlusion Culling" by J. Hasselgren, M. Andersson, and T. Akenine-Möller
+
+

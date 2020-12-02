@@ -219,9 +219,6 @@ void transformBoundingBox(const Model3 &m, GLfloat &minX, GLfloat &maxX, GLfloat
 		p1 /= p1.w;
 
 
-
-
-
 		glm::vec4 p2 = view * m.modelMatrix * p1;
 		p2 /= p2.w;
 		std::vector<int> sign1;
@@ -263,9 +260,6 @@ void transformBoundingBox(const Model3 &m, GLfloat &minX, GLfloat &maxX, GLfloat
 }
 
 bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat minZ, GLfloat maxZ) {
-	std::cout << "coords " << minX << " " << maxX << " " << minY << " " << maxY << std::endl;
-
-
 	glm::vec2 minP(minX, minY);
 	glm::vec2 maxP(maxX, maxY);
 
@@ -283,8 +277,6 @@ bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat m
 
 	int jStart = std::max(((int)minX) / 32, 0); 
 	int jEnd = std::min((int)ceil(maxX / 32.0f), (int)dBuffer.widthB - 1);
-
-	std::cout << "indices " << iStart << " " << iEnd << " " << jStart << " " << jEnd << std::endl;
 
 	for (int i = iStart; i <= iEnd; i++) {
 		for (int j = jStart; j <= jEnd; j++) {
@@ -387,6 +379,17 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 		for (int j = jStart; j <= jEnd; j++) {
 			Block& b = dBuffer.getBlock(j, i);
 
+			//This section is the depth buffer update from the paper
+			GLfloat dist1t = b.working - maxZ;
+			GLfloat dist01 = b.reference - b.working;
+			if (dist1t > dist01) {
+				b.working = -1.0f;
+				for (int i = 0; i < BLOCK_HEIGHT; i++) {
+					b.bits[i] = 0;
+				}
+			}
+
+			b.working = std::max(b.working, maxZ);
 			for (int k = 0; k < BLOCK_HEIGHT; k++) {
 				//These lines are important
 				uint32_t e1 = std::max(0.0f, e1f[k] - j * 32.0f);
@@ -396,6 +399,19 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
 				b.bits[k] |= result;
 			}
+
+			bool full = true;
+			for (int i = 0; i < BLOCK_HEIGHT; i++) {
+				full = (full && b.bits[i] == ~0);
+			}
+			if (full) {
+				b.reference = b.working;
+				b.reference = -1.0f;
+				for (int i = 0; i < BLOCK_HEIGHT; i++) {
+					b.bits[i] = 0;
+				}
+			}
+
 		}
 	}
 }
@@ -464,24 +480,18 @@ bool shouldDraw(const Model3& m) {
 	GLfloat minX, maxX, minY, maxY, minZ, maxZ;
 	bool badPoints, allBadPoints;
 	transformBoundingBox(m, minX, maxX, minY, maxY, minZ, maxZ, badPoints, allBadPoints);
-	std::cout << minZ;
 
 	if (allBadPoints) {
-		//return false;
+		return false;
 	}
 
 	if (badPoints) {
-		//return true;
+		return true;
 	}
 
 	//Depth test
-
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
-
-
-	dBuffer.reset();
 	updateDepthBuffer(m, maxZ);
-	dBuffer.print();
 
 
 	return visible;
