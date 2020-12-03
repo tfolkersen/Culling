@@ -431,7 +431,7 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 			GLfloat dist1t = b.working - maxZ;
 			GLfloat dist01 = b.reference - b.working;
 			if (dist1t > dist01) {
-				b.working = -1.0f;
+				b.working = 0.0f;
 				for (int i = 0; i < BLOCK_HEIGHT; i++) {
 					b.bits[i] = 0;
 				}
@@ -454,7 +454,7 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 			}
 			if (full) {
 				b.reference = b.working;
-				b.working = -1.0f;
+				b.working = 0.0f;
 				for (int i = 0; i < BLOCK_HEIGHT; i++) {
 					b.bits[i] = 0;
 				}

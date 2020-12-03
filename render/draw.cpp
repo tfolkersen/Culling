@@ -181,7 +181,7 @@ void makeScene2() {
 	ground.modelMatrix = glm::translate(ground.modelMatrix, glm::vec3(0.0f, -3.5f, 0.0f));
 	ground.modelMatrix = glm::scale(ground.modelMatrix, glm::vec3(200.0f, 0.2f, 200.0f));
 	ground.modelMatrix = glm::rotate(ground.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	sceneModels.push_back(ground);
+	//sceneModels.push_back(ground);
 
 	//Big
 	brownOffice.modelMatrix = glm::mat4();
