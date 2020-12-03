@@ -454,7 +454,7 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 			}
 			if (full) {
 				b.reference = b.working;
-				b.reference = -1.0f;
+				b.working = -1.0f;
 				for (int i = 0; i < BLOCK_HEIGHT; i++) {
 					b.bits[i] = 0;
 				}
@@ -495,10 +495,5 @@ bool shouldDraw(const ModelCollection& m) {
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
 	updateDepthBuffer(m, maxZ);
 
-	if (!visible) {
-		std::cout << "Depth culling! " << currentFrame << std::endl;
-	}
-
 	return visible;
-
 }

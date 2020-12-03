@@ -175,11 +175,19 @@ void makeScene2() {
 	ModelCollection redOffice = parseModelCollection("models/office/main.obj", 0.4f, 0.0f, 0.0f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection brownOffice = parseModelCollection("models/office/main.obj", 0.45f, 0.18f, 0.07f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection yellowOffice = parseModelCollection("models/office/main.obj", 0.3, 0.3f, 0.07f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
+	ModelCollection ground = parseModelCollection("models/cube.obj", 0.1f, 0.1f, 0.1f, "models/cube.obj", "models/cube.obj", "models/cube.obj");
+
+	ground.modelMatrix = glm::mat4();
+	ground.modelMatrix = glm::translate(ground.modelMatrix, glm::vec3(0.0f, -3.5f, 0.0f));
+	ground.modelMatrix = glm::scale(ground.modelMatrix, glm::vec3(200.0f, 0.2f, 200.0f));
+	ground.modelMatrix = glm::rotate(ground.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	//sceneModels.push_back(ground);
+
 
 
 	//Big
 	brownOffice.modelMatrix = glm::mat4();
-	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(0.0f, 0.0f, -10.0f));
+	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(0.0f, 2.0f, -10.0f));
 	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(6.0f, 4.0f, 2.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 2.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
@@ -313,7 +321,7 @@ void render2() {
 	setLights();
 
 
-	//std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
+	std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
 
 	dBuffer.reset();
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
