@@ -69,31 +69,27 @@ std::vector<std::string> split(std::string str, std::string del) {
 
 void fixTriangle(glm::vec2 &t1, glm::vec2 &t2, glm::vec2 &t3) {
 	//TODO this causes lockups
-	GLfloat epsilon = 0.0001;
+	GLfloat epsilon = 0.001;
 	bool problem = true;
 	int iters = 0;
+	return;
 
 	while (problem) {
 		iters++;
 		if (iters > 1) {
 			std::cout << "FixTriangle: " << iters << std::endl;
 
+			std::cout << epsilon << " " << epsilon * 0.9 << " " << epsilon * 0.95 << std::endl;
+
 		}
 		problem = false;
-		if (t1.y == t2.y) {
+		if (t1.y == t2.y || t1.y == t3.y || t2.y == t3.y) {
 			problem = true;
 			t1.y += epsilon;
+			t2.y += epsilon * 0.9;
+			t3.y += epsilon * 0.95;
 		}
 
-		if (t1.y == t3.y) {
-			problem = true;
-			t3.y += epsilon * 0.9f;
-		}
-
-		if (t2.y == t3.y) {
-			problem = true;
-			t2.y += epsilon * 0.95f;
-		}
 	}
 }
 

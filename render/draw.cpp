@@ -319,7 +319,6 @@ void render2() {
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
 		if (shouldDraw(*it)) {
 			drawModelCollection(*it);
-			break;
 		} else {
 			//std::cout << "skipped " << currentFrame << std::endl;
 		}

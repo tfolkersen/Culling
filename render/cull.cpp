@@ -271,7 +271,7 @@ void transformPoints(const std::vector<GLfloat> &data, std::vector<glm::vec3> &t
 	}
 }
 
-void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX, GLfloat &minY, GLfloat &maxY, GLfloat &minZ, GLfloat &maxZ, bool &badPoints, bool &allBadPoints) {
+void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX, GLfloat &minY, GLfloat &maxY, GLfloat &minZ, GLfloat &maxZ) {
 	std::vector<glm::vec3> tris;
 	transformPoints(m.boxData, tris, m.modelMatrix);
 
@@ -330,18 +330,17 @@ bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat m
 		for (int j = jStart; j <= jEnd; j++) {
 			Block& b = dBuffer.getBlock(j, i);
 
-		//	if (b.reference >= minZ) {
-		//		return true;
-		//	}
-
-			for (int k = 0; k < BLOCK_HEIGHT; k++) {
-				uint32_t result = ~0;
-				b.bits[k] = result;
+			if (b.reference >= minZ) {
+				return true;
 			}
+
+			//for (int k = 0; k < BLOCK_HEIGHT; k++) {
+			//	uint32_t result = ~0;
+			//	b.bits[k] = result;
+			//}
 		}
 	}
-	return true;
-	//return false;
+	return false;
 }
 
 void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat maxZ) {
@@ -469,56 +468,19 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 
 void updateDepthBuffer(const ModelCollection &m, GLfloat maxZ) {
 
-	for (auto it = m.occluderData.begin(); it != m.occluderData.end();) {
-		glm::vec4 p1(*it++, *it++, *it++, 1.0f);
-		glm::vec4 p2(*it++, *it++, *it++, 1.0f);
-		glm::vec4 p3(*it++, *it++, *it++, 1.0f);
+	std::vector<glm::vec3> transformed;
+	transformPoints(m.occluderData, transformed, m.modelMatrix);
 
-		glm::mat4 rot = glm::rotate(glm::mat4(), (GLfloat)-PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, -1.0f));
+	for (auto it = transformed.begin(); it != transformed.end();) {
+		glm::vec3& p1 = *it++;
+		glm::vec3& p2 = *it++;
+		glm::vec3& p3 = *it++;
 
-		/*
-			I have no idea why, but this scaling and rotation is needed, otherwise the rasterization shows a different view of the object...
-		*/
-		p1 = view * m.modelMatrix * rot * scale * p1;
-		p2 = view * m.modelMatrix * rot * scale * p2;
-		p3 = view * m.modelMatrix * rot * scale * p3;
-		p1 /= p1.w;
-		p2 /= p2.w;
-		p3 /= p3.w;
+		glm::vec2 t1(p1);
+		glm::vec2 t2(p2);
+		glm::vec2 t3(p3);
 
-		std::vector<int> signs1;
-		signs1.push_back(SIGN(p1.x));
-		signs1.push_back(SIGN(p1.y));
-		signs1.push_back(SIGN(p2.x));
-		signs1.push_back(SIGN(p2.y));
-		signs1.push_back(SIGN(p3.x));
-		signs1.push_back(SIGN(p3.y));
-
-		p1 = project * p1;
-		p2 = project * p2;
-		p3 = project * p3;
-		p1 /= p1.w;
-		p2 /= p2.w;
-		p3 /= p3.w;
-
-		std::vector<int> signs2;
-		signs2.push_back(SIGN(p1.x));
-		signs2.push_back(SIGN(p1.y));
-		signs2.push_back(SIGN(p2.x));
-		signs2.push_back(SIGN(p2.y));
-		signs2.push_back(SIGN(p3.x));
-		signs2.push_back(SIGN(p3.y));
-
-
-		if (signs1 != signs2) {
-			continue;
-		}
-
-		glm::vec2 t1(p1.x, p1.y);
-		glm::vec2 t2(p2.x, p2.y);
-		glm::vec2 t3(p3.x, p3.y);
-
+		//rasterize(t1, t2, t3);
 		renderIntoDepthBuffer(t1, t2, t3, maxZ);
 	}
 
@@ -527,26 +489,10 @@ void updateDepthBuffer(const ModelCollection &m, GLfloat maxZ) {
 bool shouldDraw(const ModelCollection& m) {
 	//Transform bounding box into bounding square
 	GLfloat minX, maxX, minY, maxY, minZ, maxZ;
-	bool badPoints, allBadPoints;
-	transformBoundingBox(m, minX, maxX, minY, maxY, minZ, maxZ, badPoints, allBadPoints);
-
-
-
-	if (allBadPoints) {
-		//std::cout << "all bad points " << currentFrame << std::endl;
-		//return false;
-	}
-
-	if (badPoints) {
-	//	std::cout << "bad points " << currentFrame << std::endl;
-	//	return true;
-	}
+	transformBoundingBox(m, minX, maxX, minY, maxY, minZ, maxZ);
 
 	//Depth test
-	dBuffer.reset();
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
-	dBuffer.print();
-	std::cout << std::endl;
 	updateDepthBuffer(m, maxZ);
 
 	if (!visible) {
