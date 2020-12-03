@@ -11,6 +11,8 @@
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
 
+#define NEAR 0.01f
+
 
 extern GLuint programID;
 extern GLFWwindow* window;

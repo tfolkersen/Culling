@@ -194,7 +194,87 @@ bool triangleOutsideWindow(const glm::vec4 &p1, const glm::vec4 &p2, const glm::
 	return windowClip(t1, t2) && windowClip(t1, t3) && windowClip(t2, t3);
 }
 
+#define INSIDE(p) \
+	(p.z <= -NEAR)
+
+void transformPoints(const std::vector<GLfloat> &data, std::vector<glm::vec3> &tris, const glm::mat4 &model) {
+		glm::mat4 rot = glm::rotate(glm::mat4(), (GLfloat)-PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, -1.0f));
+
+		/*
+			I have no idea why, but this scaling and rotation is needed, otherwise the rasterization shows a different view of the object...
+		*/
+
+
+	for (auto it = data.begin(); it != data.end();) {
+		glm::vec4 t1(*it++, *it++, *it++, 1.0f);
+		glm::vec4 t2(*it++, *it++, *it++, 1.0f);
+		glm::vec4 t3(*it++, *it++, *it++, 1.0f);
+		
+		t1 = view * model * rot * scale * t1;
+		t1 /= t1.w;
+		t2 = view * model * rot * scale * t2;
+		t2 /= t2.w;
+		t3 = view * model * rot * scale * t3;
+		t3 /= t3.w;
+
+		//subroutine
+		std::vector<glm::vec4*> points;
+		std::vector<glm::vec4> face;
+		points.push_back(&t1);
+		points.push_back(&t2);
+		points.push_back(&t3);
+
+		std::vector<std::pair<glm::vec4*, glm::vec4*>> pairs;
+		pairs.push_back(std::pair<glm::vec4*, glm::vec4*>(points[0], points[1]));
+		pairs.push_back(std::pair<glm::vec4*, glm::vec4*>(points[1], points[2]));
+		pairs.push_back(std::pair<glm::vec4*, glm::vec4*>(points[2], points[0]));
+
+		for (auto it = pairs.begin(); it != pairs.end(); it++) {
+			glm::vec4& s = (*it->first);
+			glm::vec4& p = (*it->second);
+
+			if (INSIDE(s) && INSIDE(p)) {
+				face.push_back(p);
+			}
+			else if (INSIDE(s) && !INSIDE(p)) {
+				GLfloat a = (-NEAR - s.z) / (p.z - s.z);
+				glm::vec4 i = s + (p - s) * a;
+				face.push_back(i);
+			}
+			else if (!INSIDE(s) && !INSIDE(p)) {
+				continue;
+			}
+			else if (!INSIDE(s) && INSIDE(p)) {
+				GLfloat a = (-NEAR - s.z) / (p.z - s.z);
+				glm::vec4 i = s + (p - s) * a;
+				face.push_back(i);
+				face.push_back(p);
+			}
+		}
+
+		for (auto it = face.begin(); it != face.end(); it++) {
+			(*it) = project * (*it);
+			(*it) /= it->w;
+		}
+
+
+		for (int i = 1; i + 1 < face.size(); i += 1) {
+			glm::vec4& p1 = face[0];
+			glm::vec4& p2 = face[i];
+			glm::vec4& p3 = face[i + 1];
+
+			tris.push_back(glm::vec3(p1));
+			tris.push_back(glm::vec3(p2));
+			tris.push_back(glm::vec3(p3));
+		}
+	}
+}
+
 void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX, GLfloat &minY, GLfloat &maxY, GLfloat &minZ, GLfloat &maxZ, bool &badPoints, bool &allBadPoints) {
+	std::vector<glm::vec3> tris;
+	transformPoints(m.boxData, tris, m.modelMatrix);
+
 	minX = std::numeric_limits<GLfloat>::max();
 	maxX = std::numeric_limits<GLfloat>::min();
 
@@ -204,47 +284,17 @@ void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX
 	minZ = std::numeric_limits<GLfloat>::max();
 	maxZ = std::numeric_limits<GLfloat>::min();
 
-	size_t pointCount = 0;
-	size_t badPointCount = 0;
-	for (auto it = m.boxData.begin(); it != m.boxData.end();) {
-		pointCount++;
-		glm::vec4 p1(*it++, *it++, *it++, 1.0f);
+	for (auto it = tris.begin(); it != tris.end(); it++) {
+		glm::vec3& p = *it;
 
-		glm::mat4 rot = glm::rotate(glm::mat4(), (GLfloat)-PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, -1.0f));
+		minX = std::min(minX, p.x);
+		maxX = std::max(maxX, p.x);
 
-		/*
-			I have no idea why, but this scaling and rotation is needed, otherwise the rasterization shows a different view of the object...
-		*/
-		p1 =  rot * scale * p1;
-		p1 /= p1.w;
+		minY = std::min(minY, p.y);
+		maxY = std::max(maxY, p.y);
 
-
-		glm::vec4 p2 = view * m.modelMatrix * p1;
-		p2 /= p2.w;
-		std::vector<int> sign1;
-		sign1.push_back(SIGN(p2.x));
-		sign1.push_back(SIGN(p2.y));
-
-		glm::vec4 p3 = project * view * m.modelMatrix * p1;
-		p3 /= p3.w;
-		std::vector<int> sign2;
-		sign2.push_back(SIGN(p3.x));
-		sign2.push_back(SIGN(p3.y));
-
-		if (sign1 != sign2) {
-			badPointCount++;
-		}
-
-		minX = std::min(minX, p3.x);
-		maxX = std::max(maxX, p3.x);
-
-		minY = std::min(minY, p3.y);
-		maxY = std::max(maxY, p3.y);
-
-		minZ = std::min(minZ, p3.z);
-		maxZ = std::max(maxZ, p3.z);
-		
+		minZ = std::min(minZ, p.z);
+		maxZ = std::max(maxZ, p.z);
 	}
 
 	minX = std::max(minX, -1.0f);
@@ -255,9 +305,6 @@ void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX
 
 	minZ = std::max(minZ, -1.0f);
 	maxZ = std::min(maxZ, 1.0f);
-
-	badPoints = badPointCount > 0;
-	allBadPoints = (badPointCount == pointCount);
 }
 
 bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat minZ, GLfloat maxZ) {
@@ -283,17 +330,18 @@ bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat m
 		for (int j = jStart; j <= jEnd; j++) {
 			Block& b = dBuffer.getBlock(j, i);
 
-			if (b.reference >= minZ) {
-				return true;
-			}
+		//	if (b.reference >= minZ) {
+		//		return true;
+		//	}
 
-			//for (int k = 0; k < BLOCK_HEIGHT; k++) {
-			//	uint32_t result = ~0;
-			//	b.bits[k] = result;
-			//}
+			for (int k = 0; k < BLOCK_HEIGHT; k++) {
+				uint32_t result = ~0;
+				b.bits[k] = result;
+			}
 		}
 	}
-	return false;
+	return true;
+	//return false;
 }
 
 void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat maxZ) {
@@ -482,9 +530,11 @@ bool shouldDraw(const ModelCollection& m) {
 	bool badPoints, allBadPoints;
 	transformBoundingBox(m, minX, maxX, minY, maxY, minZ, maxZ, badPoints, allBadPoints);
 
+
+
 	if (allBadPoints) {
-		std::cout << "all bad points " << currentFrame << std::endl;
-		return false;
+		//std::cout << "all bad points " << currentFrame << std::endl;
+		//return false;
 	}
 
 	if (badPoints) {
@@ -493,7 +543,10 @@ bool shouldDraw(const ModelCollection& m) {
 	}
 
 	//Depth test
+	dBuffer.reset();
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
+	dBuffer.print();
+	std::cout << std::endl;
 	updateDepthBuffer(m, maxZ);
 
 	if (!visible) {

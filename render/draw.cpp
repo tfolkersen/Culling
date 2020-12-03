@@ -313,12 +313,13 @@ void render2() {
 	setLights();
 
 
-	std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
+	//std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
 
 	dBuffer.reset();
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
 		if (shouldDraw(*it)) {
 			drawModelCollection(*it);
+			break;
 		} else {
 			//std::cout << "skipped " << currentFrame << std::endl;
 		}
