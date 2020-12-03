@@ -20,6 +20,8 @@
 #include <sstream>
 #include <string>
 
+#define NEAR 0.01f
+
 #define KEY_FORWARD GLFW_KEY_W
 #define KEY_LEFT GLFW_KEY_A
 #define KEY_BACK GLFW_KEY_S
@@ -54,8 +56,12 @@ bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
 }
 
-void printVec(glm::vec2& v) {
+void printvec(glm::vec2& v) {
 	std::cout << "[" << v.x << " " << v.y << "]";
+}
+
+void printvec(glm::vec3& v) {
+	std::cout << "[" << v.x << " " << v.y << " " << v.z << "]";
 }
 
 void printVec(glm::vec4& v) {
@@ -622,8 +628,8 @@ void rasterizeSilent(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 
 				uint32_t result = line(e1, e2, e3, mask1, mask2, mask3);
 				//b.bits[k] = result;
-				printBits(result);
-				std::cout << " events " << e1 << " " << e2 << " " << e3 << std::endl;
+				//printBits(result);
+				//std::cout << " events " << e1 << " " << e2 << " " << e3 << std::endl;
 				b.bits[k] |= result;
 			}
 		}
@@ -915,7 +921,7 @@ void init() {
 	std::cout << u_LightPos << " " << u_LightColor << " " << u_AmbientLight << " " << u_MvpMat << " " << u_ModelMat << " " << u_NormalMat << std::endl;
 
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	project = glm::perspective(glm::radians(90.0f), (GLfloat) SCREEN_WIDTH / (GLfloat) SCREEN_HEIGHT, 0.01f, 100.0f);
+	project = glm::perspective(glm::radians(90.0f), (GLfloat) SCREEN_WIDTH / (GLfloat) SCREEN_HEIGHT, NEAR, 100.0f);
 
 	makeModels();
 
@@ -1232,6 +1238,13 @@ int main() {
 }
 
 
+#define INSIDE(p) \
+	(p.z <= NEAR)
+
+bool clipComparator(const glm::vec4 &p1, const glm::vec4 &p2) {
+	return INSIDE(p1);
+}
+
 void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
 	p1 = view * model * p1;
 	p2 = view * model * p2;
@@ -1239,78 +1252,75 @@ void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
 	p1 /= p1.a;
 	p2 /= p2.a;
 	p3 /= p3.a;
+
 	printVec(p1);
+	std::cout << std::endl;
 	printVec(p2);
+	std::cout << std::endl;
 	printVec(p3);
 	std::cout << std::endl;
-	std::vector<int> sign1;
 
-	#define SIGN(element) \
-	(element > 0) - (element < 0)
+	//subroutine
+	std::vector<glm::vec4> points;
+	std::vector<glm::vec4> face;
+	points.push_back(p1);
+	points.push_back(p2);
+	points.push_back(p3);
+	std::sort(points.begin(), points.end(), clipComparator);
 
-	sign1.push_back(SIGN(p1.x));
-	sign1.push_back(SIGN(p1.y));
-	sign1.push_back(SIGN(p2.x));
-	sign1.push_back(SIGN(p2.y));
-	sign1.push_back(SIGN(p3.x));
-	sign1.push_back(SIGN(p3.y));
-	p1 = project * p1;
-	p2 = project * p2;
-	p3 = project * p3;
-	p1 /= p1.a;
-	p2 /= p2.a;
-	p3 /= p3.a;
-	printVec(p1);
-	printVec(p2);
-	printVec(p3);
-	std::cout << std::endl;
-	std::vector<int> sign2;
-	sign2.push_back(SIGN(p1.x));
-	sign2.push_back(SIGN(p1.y));
-	sign2.push_back(SIGN(p2.x));
-	sign2.push_back(SIGN(p2.y));
-	sign2.push_back(SIGN(p3.x));
-	sign2.push_back(SIGN(p3.y));
-
-	#define FIX_SIGN(element, sign) \
-	if (sign != 0 && SIGN(element) != sign) {\
-		element *= sign;\
+	if (!INSIDE(points[0])) {
+		std::cout << "No point inside" << std::endl;
+		return;
 	}
 
-	//FIX_SIGN(p1.x, sign1[0]);
-	//FIX_SIGN(p1.y, sign1[1]);
-	//FIX_SIGN(p2.x, sign1[2]);
-	//FIX_SIGN(p2.y, sign1[3]);
-	//FIX_SIGN(p3.x, sign1[4]);
-	//FIX_SIGN(p3.y, sign1[5]);
+	std::vector<std::pair<glm::vec4, glm::vec4>> pairs;
+	pairs.push_back(std::pair<glm::vec4, glm::vec4>(points[0], points[1]));
+	pairs.push_back(std::pair<glm::vec4, glm::vec4>(points[1], points[2]));
+	pairs.push_back(std::pair<glm::vec4, glm::vec4>(points[2], points[0]));
 
+	for (auto it = pairs.begin(); it != pairs.end(); it++) {
+		glm::vec4& s = it->first;
+		glm::vec4& p = it->second;
 
-
-	
-
-
-	glm::vec2 t1(p1.x, p1.y);
-	glm::vec2 t2(p2.x, p2.y);
-	glm::vec2 t3(p3.x, p3.y);
-
-	std::cout << "depths (" << p1.z << " " << p2.z << " " << p3.z << ")" << std::endl;
-	//printVec(t1);
-	//printVec(t2);
-	//printVec(t3);
-	std::cout << std::endl;
-
-
-	if (sign1 != sign2) {
-		std::cout << "\033[1;31m";
-	} else {
-		std::cout << "\033[1;37m";
+		if (INSIDE(s) && INSIDE(p)) {
+			face.push_back(p);
+		} else if (INSIDE(s) && !INSIDE(p)) {
+			GLfloat a = (-NEAR - s.z) / (p.z - s.z);
+			glm::vec4 i = s + (p - s) * a;
+			face.push_back(i);
+		} else if (!INSIDE(s) && !INSIDE(p)) {
+			continue;
+		} else if (!INSIDE(s) && INSIDE(p)) {
+			GLfloat a = (-NEAR - s.z) / (p.z - s.z);
+			glm::vec4 i = s + (p - s) * a;
+			face.push_back(i);
+			face.push_back(p);
+		}
 	}
+
+	std::cout << face.size() << std::endl;
+
+	for (auto it = face.begin(); it != face.end(); it++) {
+		(*it) = project * (*it);
+		(*it) /= it->w;
+	}
+
+
+	for (int i = 1; i + 1 < face.size(); i+=1) {
+		glm::vec4& p1 = face[0];
+		glm::vec4& p2 = face[i];
+		glm::vec4& p3 = face[i + 1];
+
+		rasterizeSilent(glm::vec2(p1), glm::vec2(p2), glm::vec2(p3));
+	}
+
+
+
 
 	if (abs(p1.z) >= 1.0f && abs(p2.z) >= 1.0f && abs(p3.z) >= 1.0f) {
 		return;
 	}
 
-	rasterizeSilent(t1, t2, t3);
 }
 
 
@@ -1325,7 +1335,7 @@ void test() {
 	dBuffer.reset();
 	//maskVec4s(p1, p2, p3);
 	maskVec4s(p4, p5, p6);
-	//dBuffer.print();
+	dBuffer.print();
 
 
 
