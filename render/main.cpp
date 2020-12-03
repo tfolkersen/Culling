@@ -104,8 +104,8 @@ void printBits(uint32_t v) {
 //#define BUFFER_WIDTH 32*20
 //#define BUFFER_HEIGHT 32*15
 
-#define BUFFER_WIDTH 32
-#define BUFFER_HEIGHT 32
+#define BUFFER_WIDTH 128
+#define BUFFER_HEIGHT 64
 
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
@@ -1241,10 +1241,6 @@ int main() {
 #define INSIDE(p) \
 	(p.z <= NEAR)
 
-bool clipComparator(const glm::vec4 &p1, const glm::vec4 &p2) {
-	return INSIDE(p1);
-}
-
 void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
 	p1 = view * model * p1;
 	p2 = view * model * p2;
@@ -1266,12 +1262,6 @@ void maskVec4s(glm::vec4 p1, glm::vec4 p2, glm::vec4 p3) {
 	points.push_back(p1);
 	points.push_back(p2);
 	points.push_back(p3);
-	std::sort(points.begin(), points.end(), clipComparator);
-
-	if (!INSIDE(points[0])) {
-		std::cout << "No point inside" << std::endl;
-		return;
-	}
 
 	std::vector<std::pair<glm::vec4, glm::vec4>> pairs;
 	pairs.push_back(std::pair<glm::vec4, glm::vec4>(points[0], points[1]));
