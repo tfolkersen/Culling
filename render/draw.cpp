@@ -181,9 +181,7 @@ void makeScene2() {
 	ground.modelMatrix = glm::translate(ground.modelMatrix, glm::vec3(0.0f, -3.5f, 0.0f));
 	ground.modelMatrix = glm::scale(ground.modelMatrix, glm::vec3(200.0f, 0.2f, 200.0f));
 	ground.modelMatrix = glm::rotate(ground.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	//sceneModels.push_back(ground);
-
-
+	sceneModels.push_back(ground);
 
 	//Big
 	brownOffice.modelMatrix = glm::mat4();
@@ -195,58 +193,57 @@ void makeScene2() {
 
 	//Left 1
 	blueOffice.modelMatrix = glm::mat4();
-	blueOffice.modelMatrix = glm::translate(blueOffice.modelMatrix, glm::vec3(-40.0f, 0.0f, -30.0f));
+	blueOffice.modelMatrix = glm::translate(blueOffice.modelMatrix, glm::vec3(-40.0f, 0.0f, -50.0f));
 	blueOffice.modelMatrix = glm::scale(blueOffice.modelMatrix, glm::vec3(1.0f, 2.3f, 1.0f));
 	blueOffice.modelMatrix = glm::rotate(blueOffice.modelMatrix, (GLfloat) PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(blueOffice);
 
 	yellowOffice.modelMatrix = glm::mat4();
-	yellowOffice.modelMatrix = glm::translate(yellowOffice.modelMatrix, glm::vec3(-35.0f, 0.0f, -30.0f));
+	yellowOffice.modelMatrix = glm::translate(yellowOffice.modelMatrix, glm::vec3(-35.0f, 0.0f, -50.0f));
 	yellowOffice.modelMatrix = glm::scale(yellowOffice.modelMatrix, glm::vec3(-1.0f, 2.1f, 1.0f));
 	yellowOffice.modelMatrix = glm::rotate(yellowOffice.modelMatrix, (GLfloat) PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(yellowOffice);
 
 	blueOffice.modelMatrix = glm::mat4();
-	blueOffice.modelMatrix = glm::translate(blueOffice.modelMatrix, glm::vec3(-28.0f, 0.0f, -30.0f));
+	blueOffice.modelMatrix = glm::translate(blueOffice.modelMatrix, glm::vec3(-28.0f, 0.0f, -50.0f));
 	blueOffice.modelMatrix = glm::scale(blueOffice.modelMatrix, glm::vec3(-1.5f, 2.3f, 1.5f));
 	blueOffice.modelMatrix = glm::rotate(blueOffice.modelMatrix, (GLfloat) PI / 4.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(blueOffice);
 
 	//Left 2
 	yellowOffice.modelMatrix = glm::mat4();
-	yellowOffice.modelMatrix = glm::translate(yellowOffice.modelMatrix, glm::vec3(-48.0f, 0.0f, -40.0f));
+	yellowOffice.modelMatrix = glm::translate(yellowOffice.modelMatrix, glm::vec3(-48.0f, 0.0f, -70.0f));
 	yellowOffice.modelMatrix = glm::scale(yellowOffice.modelMatrix, glm::vec3(-1.0f, 2.4f, 1.0f));
 	yellowOffice.modelMatrix = glm::rotate(yellowOffice.modelMatrix, (GLfloat) PI / 6.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(yellowOffice);
 
 	greenOffice.modelMatrix = glm::mat4();
-	greenOffice.modelMatrix = glm::translate(greenOffice.modelMatrix, glm::vec3(-36.0f, 0.0f, -40.0f));
+	greenOffice.modelMatrix = glm::translate(greenOffice.modelMatrix, glm::vec3(-36.0f, 0.0f, -70.0f));
 	greenOffice.modelMatrix = glm::scale(greenOffice.modelMatrix, glm::vec3(-1.0f, 1.6f, 1.0f));
 	greenOffice.modelMatrix = glm::rotate(greenOffice.modelMatrix, (GLfloat) -PI / 8.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(greenOffice);
 
 	redOffice.modelMatrix = glm::mat4();
-	redOffice.modelMatrix = glm::translate(redOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -40.0f));
+	redOffice.modelMatrix = glm::translate(redOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -70.0f));
 	redOffice.modelMatrix = glm::scale(redOffice.modelMatrix, glm::vec3(-3.0f, 2.12f, -3.0f));
 	redOffice.modelMatrix = glm::rotate(redOffice.modelMatrix, (GLfloat) PI / 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(redOffice);
 
-
 	//Left 3
 	redOffice.modelMatrix = glm::mat4();
-	redOffice.modelMatrix = glm::translate(redOffice.modelMatrix, glm::vec3(-45.0f, 0.0f, -60.0f));
+	redOffice.modelMatrix = glm::translate(redOffice.modelMatrix, glm::vec3(-45.0f, 0.0f, -90.0f));
 	redOffice.modelMatrix = glm::scale(redOffice.modelMatrix, glm::vec3(1.0f, 2.0f, -1.0f));
 	redOffice.modelMatrix = glm::rotate(redOffice.modelMatrix, (GLfloat) -PI / 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(redOffice);
 
 	purpleOffice.modelMatrix = glm::mat4();
-	purpleOffice.modelMatrix = glm::translate(purpleOffice.modelMatrix, glm::vec3(-27.0f, 0.0f, -60.0f));
+	purpleOffice.modelMatrix = glm::translate(purpleOffice.modelMatrix, glm::vec3(-27.0f, 0.0f, -90.0f));
 	purpleOffice.modelMatrix = glm::scale(purpleOffice.modelMatrix, glm::vec3(2.0f, 2.6f, -2.0f));
 	purpleOffice.modelMatrix = glm::rotate(purpleOffice.modelMatrix, (GLfloat) PI / 4.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(purpleOffice);
 
 	orangeOffice.modelMatrix = glm::mat4();
-	orangeOffice.modelMatrix = glm::translate(orangeOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -60.0f));
+	orangeOffice.modelMatrix = glm::translate(orangeOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -90.0f));
 	orangeOffice.modelMatrix = glm::scale(orangeOffice.modelMatrix, glm::vec3(1.6f, 2.6f, -1.6f));
 	orangeOffice.modelMatrix = glm::rotate(orangeOffice.modelMatrix, (GLfloat) -PI / 6.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(orangeOffice);
@@ -298,13 +295,6 @@ void makeScene2() {
 
 
 
-
-
-
-
-
-
-
 }
 
 bool modelComparator(const ModelCollection& m1, const ModelCollection& m2) {
@@ -332,8 +322,6 @@ void render2() {
 		}
 	}
 
-	//sceneModels[0].modelMatrix = glm::rotate(sceneModels[0].modelMatrix, 0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
-
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
@@ -344,7 +332,7 @@ void render2() {
 double distSquaredToCamera(const ModelCollection &m) {
 	glm::vec4 transformed = view * m.modelMatrix * glm::vec4(m.boxCenter, 1.0f);
 	glm::vec3 p = glm::vec3(transformed / transformed.a);
-	return ((double)p.x * p.x) + ((double)p.y * p.y) + ((double)p.z * p.z);
+	return ((double)p.x * (double)p.x) + ((double)p.y * (double)p.y) + ((double)p.z * (double)p.z);
 }
 
 
