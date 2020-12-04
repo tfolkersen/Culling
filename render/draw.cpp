@@ -24,6 +24,9 @@ glm::mat4 project;
 std::vector<ModelCollection> sceneModels;
 
 
+std::fstream statsFile;
+
+
 void setMatrices() {
 	glUniformMatrix4fv(u_MvpMat, 1, GL_FALSE, &mvp[0][0]);
 	glUniformMatrix4fv(u_ModelMat, 1, GL_FALSE, &model[0][0]);
@@ -581,6 +584,8 @@ void render2() {
 			//std::cout << "skipped " << currentFrame << std::endl;
 		}
 	}
+
+	statsFile << currentFrame << " " << sceneModels.size() << " " << drawn << std::endl;
 
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));

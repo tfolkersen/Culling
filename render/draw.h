@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "models.h"
+#include <fstream>
 
 #define FPS 60 //Max frames per second
 
@@ -28,6 +29,8 @@ extern glm::mat4 model;
 extern glm::mat4 normal;
 extern glm::mat4 view;
 extern glm::mat4 project;
+
+extern std::fstream statsFile;
 
 extern std::vector<ModelCollection> sceneModels;
 

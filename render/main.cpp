@@ -65,6 +65,8 @@ void init() {
 		nextReplayFrame = std::stoull(tokens[1]);
 	}
 
+	statsFile.open("stats.txt", std::fstream::out | std::fstream::trunc);
+
 }
 
 
@@ -140,6 +142,7 @@ int main() {
 	} while (!glfwWindowShouldClose(window));
 
 	replayFile.close();
+	statsFile.close();
 	std::cout << "Ending on frame " << currentFrame << std::endl;
 	return 0;
 }
