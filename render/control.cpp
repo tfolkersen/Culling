@@ -217,6 +217,9 @@ void handleInput() {
 }
 
 void cursorCallback(GLFWwindow* window, double xPos, double yPos) {
+	if (replayMode == PLAY) {
+		return;
+	}
 	double dx = xPos - (SCREEN_WIDTH / 2.0);
 	double dy = yPos - (SCREEN_HEIGHT / 2.0);
 

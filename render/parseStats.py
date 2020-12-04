@@ -26,6 +26,5 @@ plt.plot(frames, fracs)
 plt.xlabel("frame number")
 plt.ylabel("fraction of models drawn")
 plt.ylim(0.0, 1.0)
-plt.show()
-#plt.savefig("stats.png")
+plt.savefig("stats.png")
 
