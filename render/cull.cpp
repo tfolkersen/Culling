@@ -466,15 +466,19 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 
 
 
-void updateDepthBuffer(const ModelCollection &m, GLfloat maxZ) {
+void updateDepthBuffer(const ModelCollection &m) {
 
 	std::vector<glm::vec3> transformed;
 	transformPoints(m.occluderData, transformed, m.modelMatrix);
+
+	GLfloat maxZ;
 
 	for (auto it = transformed.begin(); it != transformed.end();) {
 		glm::vec3& p1 = *it++;
 		glm::vec3& p2 = *it++;
 		glm::vec3& p3 = *it++;
+
+		maxZ = std:: max(p1.z, std::max(p2.z, p3.z));
 
 		glm::vec2 t1(p1);
 		glm::vec2 t2(p2);
@@ -493,7 +497,7 @@ bool shouldDraw(const ModelCollection& m) {
 
 	//Depth test
 	bool visible = depthTest(minX, maxX, minY, maxY, minZ, maxZ);
-	updateDepthBuffer(m, maxZ);
+	updateDepthBuffer(m);
 
 	return visible;
 }
