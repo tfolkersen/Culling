@@ -31,6 +31,7 @@ extern glm::mat4 view;
 extern glm::mat4 project;
 
 extern std::fstream statsFile;
+extern bool recordStats;
 
 extern std::vector<ModelCollection> sceneModels;
 

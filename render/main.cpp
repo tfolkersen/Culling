@@ -65,12 +65,28 @@ void init() {
 		nextReplayFrame = std::stoull(tokens[1]);
 	}
 
-	statsFile.open("stats.txt", std::fstream::out | std::fstream::trunc);
-
+	if (recordStats) {
+		statsFile.open("stats.txt", std::fstream::out | std::fstream::trunc);
+	}
 }
 
 
-int main() {
+int main(int argc, char **argv) {
+	replayMode = CONTROL;
+	for (int i = 1; i < argc; i++) {
+		std::string token = argv[i];
+
+		if (token == "-r") {
+			replayMode = RECORD;
+		}
+		else if (token == "-p") {
+			replayMode = PLAY;
+		}
+		else if (token == "-s") {
+			recordStats = true;
+		}
+	}
+
 
 	if (glfwInit() != GL_TRUE) {
 		std::cerr << "Failed to init glfw" << std::endl;

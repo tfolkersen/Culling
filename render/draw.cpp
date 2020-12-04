@@ -25,6 +25,7 @@ std::vector<ModelCollection> sceneModels;
 
 
 std::fstream statsFile;
+bool recordStats = false;
 
 
 void setMatrices() {
@@ -585,7 +586,9 @@ void render2() {
 		}
 	}
 
-	statsFile << currentFrame << " " << sceneModels.size() << " " << drawn << std::endl;
+	if (recordStats) {
+		statsFile << currentFrame << " " << sceneModels.size() << " " << drawn << std::endl;
+	}
 
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));
