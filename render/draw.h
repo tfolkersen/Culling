@@ -47,6 +47,7 @@ void render();
 
 
 void makeScene2();
+void makeScene3();
 bool modelComparator(const ModelCollection& m1, const ModelCollection& m2);
 
 void render2();

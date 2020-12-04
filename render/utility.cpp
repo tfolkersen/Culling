@@ -76,8 +76,8 @@ void fixTriangle(glm::vec2& t1, glm::vec2& t2, glm::vec2& t3) {
 	while (problem) {
 		iters++;
 		if (iters > 1) {
-			std::cout << "FixTriangle: " << iters << std::endl;
-			std::cout << t1.y << " " << t2.y << " " << t3.y << std::endl;
+			//std::cout << "FixTriangle: " << iters << std::endl;
+			//std::cout << t1.y << " " << t2.y << " " << t3.y << std::endl;
 
 		}
 		problem = false;

@@ -43,7 +43,7 @@ void init() {
 	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	project = glm::perspective(glm::radians(90.0f), (GLfloat) SCREEN_WIDTH / (GLfloat) SCREEN_HEIGHT, NEAR, 200.0f);
 
-	makeScene2();
+	makeScene3();
 
 	if (replayMode == PLAY) {
 		replayFile.open(replayFileName, std::fstream::in);
