@@ -197,38 +197,38 @@ void makeScene3() {
 	//1
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -20.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-10.0f, 0.0f, -20.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(0.0f, 0.0f, -20.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(10.0f, 0.0f, -20.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(20.0f, 0.0f, -20.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	//2
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -28.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
@@ -252,14 +252,14 @@ void makeScene3() {
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(20.0f, 0.0f, -28.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	//3
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -36.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
@@ -283,14 +283,14 @@ void makeScene3() {
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(20.0f, 0.0f, -36.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	//4
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -44.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
@@ -314,14 +314,14 @@ void makeScene3() {
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(20.0f, 0.0f, -44.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	//5
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -52.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
@@ -345,14 +345,14 @@ void makeScene3() {
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(20.0f, 0.0f, -52.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	//6
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -60.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
@@ -376,38 +376,38 @@ void makeScene3() {
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(20.0f, 0.0f, -60.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	//7
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -68.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(-10.0f, 0.0f, -68.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(0.0f, 0.0f, -68.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(10.0f, 0.0f, -68.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(20.0f, 0.0f, -68.0f));
-	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
@@ -571,10 +571,12 @@ void render2() {
 
 	std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
 
+	size_t drawn = 0;
 	dBuffer.reset();
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
 		if (shouldDraw(*it)) {
 			drawModelCollection(*it);
+			drawn++;
 		} else {
 			//std::cout << "skipped " << currentFrame << std::endl;
 		}
