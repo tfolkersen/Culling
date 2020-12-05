@@ -9,8 +9,8 @@
 
 #define FPS 60 //Max frames per second
 
-#define SCREEN_WIDTH 1024
-#define SCREEN_HEIGHT 768
+#define SCREEN_WIDTH 1440
+#define SCREEN_HEIGHT 1024
 
 #define NEAR 0.01f
 
