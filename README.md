@@ -19,6 +19,7 @@ I only have the first version of AVX, which only supports floating point operati
 ## Building
 Because this is a fork of the opengl-tutorial code, these instructions are based on the ones from here http://www.opengl-tutorial.org/beginners-tutorials/tutorial-1-opening-a-window/
 
+You will need to install the C++ packages in Visual Studio. I use Visual Studio 2019.
 
 * Clone this repository
 * Use CMake in Windows and point the source code directory to the root of this repository, and the build directory to root/build
