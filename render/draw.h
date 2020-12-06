@@ -13,6 +13,7 @@
 #define SCREEN_HEIGHT 1024
 
 #define NEAR 0.01f
+#define FAR 200.0f
 
 
 extern GLuint programID;

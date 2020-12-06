@@ -7,28 +7,26 @@
 #include <string>
 
 
-
 #define KEY_FORWARD GLFW_KEY_W //Move forward
 #define KEY_LEFT GLFW_KEY_A //Move left
 #define KEY_BACK GLFW_KEY_S //Move backwards
 #define KEY_RIGHT GLFW_KEY_D //Move right
 #define KEY_UP GLFW_KEY_SPACE //Move up
 #define KEY_DOWN GLFW_KEY_LEFT_CONTROL //Move down
-#define KEY_SWAP_MODELS GLFW_KEY_F //Toggle model rendering modes (normal/occluder mesh/bounding box)
-#define KEY_SPEED GLFW_KEY_LEFT_SHIFT //Move fast
+#define KEY_SWAP_MODELS GLFW_KEY_F //Toggle model rendering modes (normal mesh, bounding box, occluder, etc.)
+#define KEY_SPEED GLFW_KEY_LEFT_SHIFT //Move faster while holding this
 
 #define CAMERA_SPEED_DEFAULT 0.10f
-#define CAMERA_SPEED_FAST 0.20f;
-
-
+#define CAMERA_SPEED_FAST 0.20f
 
 #define MOUSE_SENSITIVITY 0.001 / 1.6 //How fast to rotate the camera with mouse movement
 
-extern GLfloat cameraSpeed; //Camera movement per frame in any direction
+extern GLfloat cameraSpeed; //Camera movement per frame in any direction, this current frame
 
-enum replayEnum {CONTROL, RECORD, PLAY};
+enum replayEnum {CONTROL, RECORD, PLAY}; //user control, user control + record, playback replay
 extern int replayMode;
 
+//main mesh, occluder mesh, bounding box, markers, markers and main mesh
 enum modelTypeEnum{MAIN = 0, OCCLUDER = 1, BOX = 2, MARKER = 3, MARKER2 = 4};
 extern int drawModelType;
 
@@ -36,29 +34,29 @@ extern std::string replayFileName;
 extern std::fstream replayFile;
 
 extern uint64_t currentFrame;
-extern uint64_t nextReplayFrame;
-extern bool recordedFrameNumber;
+extern uint64_t nextReplayFrame; //frame of next action in replay file being played
+extern bool recordedFrameNumber; //in replay file, was current frame number already recorded?
 
-extern GLfloat yaw;
-extern GLfloat pitch;
-extern GLfloat oldYaw;
-extern GLfloat oldPitch;
+extern GLfloat yaw; //left/right angle of camera
+extern GLfloat pitch; //up/down angle of camera
+extern GLfloat oldYaw; //previous frame's yaw
+extern GLfloat oldPitch; //previous frame's pitch
 
-bool keyPressed(int key);
+bool keyPressed(int key); //true if key was pressed
 
-void handlePlayback();
+void handlePlayback(); //get actions from replay file for this frame
 
-void recordFrameNumber();
+void recordFrameNumber(); //record current frame number in replay file if it hasn't been already
 
-void recordTranslate(const glm::vec3& v, bool beforeRotate);
+void recordTranslate(const glm::vec3& v, bool beforeRotate); //record translation of camera into replay file
 
-void recordYawPitch(GLfloat dYaw, GLfloat dPitch);
+void recordYawPitch(GLfloat dYaw, GLfloat dPitch); //record movement of camera angle into replay file
 
-void recordQuit();
+void recordQuit(); //record quit into replay file
 
-void handleGlobalInput();
+void handleGlobalInput(); //inputs allowed in all modes (quit/toggle model rendering mode)
 
-void handleInput();
-
-void cursorCallback(GLFWwindow* window, double xPos, double yPos);
+void handleInput(); //inputs allowed in control/record mode
+ 
+void cursorCallback(GLFWwindow* window, double xPos, double yPos); //capture mouse movement
 
