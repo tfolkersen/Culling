@@ -87,3 +87,6 @@ The replay file is stored in root/render/replay.txt. This file must exist before
 Playback is done with the -p flag, and the program will close if there is no replay.txt file. Replays don't know which scene they were recorded in, so if you use the flags ```-r -a``` and then use only the flag ```-p``` it will playback in the wrong scene.
 
 Replays are a way to gather statistics across different versions of the program, under the same scene and actions. For example, you can modify the culling logic and then generate new statistics in the same environment using replays. 
+
+### Statistics
+TODO
