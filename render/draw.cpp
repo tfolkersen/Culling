@@ -501,6 +501,7 @@ void renderScene() {
 }
 
 
+//squared distance from this object to the camera given the current view of the scene
 double distSquaredToCamera(ModelCollection &m) {
 	if (m.lastSorted == currentFrame) { //if already cached, return cached result
 		return m.dist2ToCamera;
