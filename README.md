@@ -48,7 +48,7 @@ Example:
 ```./render.exe -p -a -s```
 Will play the replay file in the alternate scene and will output statistics.
 
-With no flags, the user is free to move around the default scene without outputting statistics or recording a replay
+With no flags, the user is free to move around the default scene without outputting statistics or recording a replay.
 
 ### Controls
 Key bindings are specified in controls.h
