@@ -1,7 +1,6 @@
 /*	main file -- this is where execution starts
 */
 
-
 #include <iostream>
 
 //GL stuff
@@ -79,7 +78,6 @@ void init() {
 	}
 }
 
-
 //Main function...
 int main(int argc, char **argv) {
 	
@@ -101,7 +99,6 @@ int main(int argc, char **argv) {
 			sceneID = SCENE_ALTERNATE;
 		}
 	}
-
 
 	//Initialize GLFW and make window
 	if (glfwInit() != GL_TRUE) {
