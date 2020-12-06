@@ -24,6 +24,9 @@
 #define NEAR 0.01f
 #define FAR 200.0f
 
+enum sceneIDEnum { SCENE_DEFAULT = 0, SCENE_ALTERNATE = 1 }; //which scene to use
+extern int sceneID;
+
 extern GLuint programID; //GL program ID of shader program
 extern GLFWwindow* window; //GLFW window of main window
 

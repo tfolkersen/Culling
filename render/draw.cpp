@@ -6,6 +6,8 @@
 #include <algorithm>
 #include "utility.h"
 
+int sceneID = SCENE_DEFAULT; //which scene to use -- this is handled by init() in main
+
 GLuint programID; //ID of shader program
 GLFWwindow* window = NULL; //GLFW window of program
 
@@ -332,7 +334,7 @@ void makeDefaultScene() {
 
 //make the alternate scene
 void makeAlternateScene() {
-	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
+	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 1.0f);
 	ModelCollection orangeOffice = parseModelCollection("models/office/main.obj", 0.5f, 0.1f, 0.0f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection greenOffice = parseModelCollection("models/office/main.obj", 0.1f, 0.4f, 0.0f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection purpleOffice = parseModelCollection("models/office/main.obj", 0.4f, 0.0f, 0.7f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
@@ -340,7 +342,7 @@ void makeAlternateScene() {
 	ModelCollection redOffice = parseModelCollection("models/office/main.obj", 0.4f, 0.0f, 0.0f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection brownOffice = parseModelCollection("models/office/main.obj", 0.45f, 0.18f, 0.07f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection yellowOffice = parseModelCollection("models/office/main.obj", 0.3, 0.3f, 0.07f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
-	ModelCollection ground = parseModelCollection("models/cube.obj", 0.1f, 0.1f, 0.1f, "models/cube.obj", "models/cube.obj", "models/cube.obj");
+	ModelCollection ground = parseModelCollection("models/cube.obj", 0.1f, 0.4f, 0.1f, "models/cube.obj", "models/cube.obj", "models/cube.obj");
 
 	ground.modelMatrix = glm::mat4();
 	ground.modelMatrix = glm::translate(ground.modelMatrix, glm::vec3(0.0f, -3.5f, 0.0f));

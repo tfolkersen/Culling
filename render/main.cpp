@@ -47,7 +47,12 @@ void init() {
 	project = glm::perspective(glm::radians(90.0f), (GLfloat) SCREEN_WIDTH / (GLfloat) SCREEN_HEIGHT, NEAR, FAR);
 
 	//Initialize the scene
-	makeDefaultScene();
+	if (sceneID == SCENE_ALTERNATE) {
+		makeAlternateScene();
+
+	} else {
+		makeDefaultScene();
+	}
 
 	//Initialize replay and stats files
 	if (replayMode == PLAY) {
@@ -91,6 +96,9 @@ int main(int argc, char **argv) {
 		}
 		else if (token == "-s") {
 			recordStats = true;
+		}
+		else if (token == "-a") {
+			sceneID = SCENE_ALTERNATE;
 		}
 	}
 
