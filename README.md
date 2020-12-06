@@ -82,7 +82,7 @@ Cycle through these modes in this order by pressing F. These modes only affect w
 * Markers and main — (main meshes and narrow blue pillars) show the main meshes and the blue pillars together. Another way of visualizing culling effect.
 
 ### Replays
-The replay file is stored in root/render/replay.txt. You must record before you can playback. With the -r flag, all actions are recorded except for toggling the render mode. Replays store movements instead of keys pressed, so you can modify things like the camera movement speed in control.h and the replay should still work.
+The replay file is stored in root/render/replay.txt. This file must exist before you can playback, though one meant for the default scene is included. With the -r flag, all actions are recorded except for toggling the render mode. Replays store movements instead of keys pressed, so you can modify things like the camera movement speed in control.h and the replay should still work.
 
 Playback is done with the -p flag, and the program will close if there is no replay.txt file. Replays don't know which scene they were recorded in, so if you use the flags ```-r -a``` and then use only the flag ```-p``` it will playback in the wrong scene.
 
