@@ -2,34 +2,41 @@
 #include "cull.h"
 #include <iostream>
 
+//triangle comparator -- for sorting triangles according to their y coordinates
+//sort by decreasing y coordinate
 bool triComp(glm::vec2* p1, glm::vec2* p2) {
 	return p1->y > p2->y;
 }
 
+//Print vec2 to stdout
 void printVec(glm::vec2& v) {
 	std::cout << "[" << v.x << " " << v.y << "]";
 }
 
+//Print vec3 to stdout
 void printVec(glm::vec3& v) {
 	std::cout << "[" << v.x << " " << v.y << " " << v.z << "]";
 }
 
+//Print vec4 to stdout
 void printVec(glm::vec4& v) {
 	std::cout << "[" << v.x << " " << v.y <<  " " << v.z << " " << v.a << "]";
 }
 
+//Print pair to stdout
 template<class T, class S>
 void printPair(std::pair<T, S>& p) {
 	std::cout << "<" << p.first << " " << p.second << ">";
 }
 
+//print bits of a 32 bit register -- least significant bit is on the far right
 void printBits(uint32_t v) {
 	for (int i = 0; i < 32; i++) {
-		//std::cout << ((v & (1 << (31 - i))) != 0) << " ";
 		std::cout << ((v & (1 << (31 - i))) != 0);
 	}
 }
 
+//operator to print vector to ostream
 template <class T>
 std::ostream& operator<<(std::ostream &os, const std::vector<T> &v) {
 	os << "<";
@@ -44,6 +51,7 @@ std::ostream& operator<<(std::ostream &os, const std::vector<T> &v) {
 	return os;
 }
 
+//split a string by a delimiter -- see header file for details
 std::vector<std::string> split(std::string str, std::string del) {
 	std::vector<std::string> list;
 
@@ -67,18 +75,17 @@ std::vector<std::string> split(std::string str, std::string del) {
 	return list;
 }
 
+//add epsilons to y coordinates until no points have the same y coordinate -- see header
 void fixTriangle(glm::vec2& t1, glm::vec2& t2, glm::vec2& t3) {
-	//TODO this causes lockups
+	//TODO this might cause lockups but in practice it doesn't seem to
 	GLfloat epsilon = 0.001;
 	bool problem = true;
 	int iters = 0;
 
 	while (problem) {
 		iters++;
-		if (iters > 1) {
-			//std::cout << "FixTriangle: " << iters << std::endl;
-			//std::cout << t1.y << " " << t2.y << " " << t3.y << std::endl;
-
+		if (iters > 5) {
+			std::cout << "fixTriangle in utility.cpp used " << iters << " iterations -- this should be fixed" << std::endl;
 		}
 		problem = false;
 		if (t1.y == t2.y) {
@@ -98,6 +105,12 @@ void fixTriangle(glm::vec2& t1, glm::vec2& t2, glm::vec2& t3) {
 	}
 }
 
+/*
+	convert vector from NDC space to pixel space (pixel space of depth buffer)
+
+	this allows depth buffers of dimensions different from the screen resolution
+	to be used
+*/
 void convertVec(glm::vec2 &v) {
 	int W = BUFFER_WIDTH - 1;
 	int H = BUFFER_HEIGHT - 1;
@@ -107,6 +120,7 @@ void convertVec(glm::vec2 &v) {
 	v.y = -(Hf / 2.0) * v.y + (Hf / 2.0);
 }
 
+//wait for this amount of time
 void fpsWait(double seconds) {
 	if (seconds < 0) {
 		return;
@@ -115,5 +129,3 @@ void fpsWait(double seconds) {
 	while ((clock() - start) / (double) CLOCKS_PER_SEC < seconds) {
 	}
 }
-
-

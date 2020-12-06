@@ -14,7 +14,6 @@ DepthBuffer dBuffer;
 
 */
 
-
 //Get bit mask for one scanline -- see header file for details
 uint32_t line(uint32_t e0, uint32_t e1, uint32_t e2, uint32_t o0, uint32_t o1, uint32_t o2) {
 	
@@ -82,7 +81,7 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	glm::vec2 f2 = p1 + ((1.0f - p1.y) / l2.y) * l2;
 	glm::vec2 f3 = p2 + ((1.0f - p2.y) / l3.y) * l3;
 
-	//points at top of screen, and points, into pixel space
+	//convert points at top of screen, and points, into pixel space
 	convertVec(f1);
 	convertVec(f2);
 	convertVec(f3);
@@ -112,10 +111,8 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	int jStart = std::max(((int)minX) / 32, 0);
 	int jEnd = std::min(((int)maxX) / 32, (int)dBuffer.widthB - 1);
 
-
 	for (int i = iStart; i <= iEnd; i++) { //iterate over height
 		int scanBase = i * BLOCK_HEIGHT; //height of top scanline (pixel space)
-
 
 		//compute events for each scanline in pixel space
 		GLfloat e1f[BLOCK_HEIGHT];
