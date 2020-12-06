@@ -12,6 +12,8 @@ by user "lukass12"/"Lukas carnota"
 
 I used Blender to generate the meshes shown in the other rendering modes.
 
+The vertex and fragment shaders are adapted from an assignment.
+
 Implements "masked occlusion culling" as proposed in the paper "Masked Software Occlusion Culling" by J. Hasselgren, M. Andersson, and T. Akenine-Möller. However, I don't use AVX or any other kind of SIMD instructions, so my solution is not as performant as theirs.
 
 I only have the first version of AVX, which only supports floating point operations, and the rasterization step uses bit shifts. Attempts to speed up the culling logic using only AVX floating point instructions seemed to slow down the solution, as there's some overhead involved.
