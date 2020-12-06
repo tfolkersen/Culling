@@ -6,28 +6,31 @@
 #include <algorithm>
 #include "utility.h"
 
-GLuint programID;
-GLFWwindow* window = NULL;
+GLuint programID; //ID of shader program
+GLFWwindow* window = NULL; //GLFW window of program
 
+//shader program uniforms
 GLuint u_LightPos, u_LightColor, u_AmbientLight, u_MvpMat, u_ModelMat, u_NormalMat;
 
+//light parameters -- some of these are modified/overwritten by the render function
 glm::vec3 lightPos(6.0f, 6.0f, 0.0f);
 glm::vec3 lightColor(2.0f, 2.0f, 2.0f);
 glm::vec3 ambientLight(0.5f, 0.5f, 0.5f);
 
+//transformation matrices
 glm::mat4 mvp;
 glm::mat4 model;
 glm::mat4 normal;
 glm::mat4 view;
 glm::mat4 project;
 
+//objects in the current scene
 std::vector<ModelCollection> sceneModels;
 
+std::fstream statsFile; //file to record stats to
+bool recordStats = false; //should stats be recorded?
 
-std::fstream statsFile;
-bool recordStats = false;
-
-
+//send matrices to GL shader program uniforms
 void setMatrices() {
 	glUniformMatrix4fv(u_MvpMat, 1, GL_FALSE, &mvp[0][0]);
 	glUniformMatrix4fv(u_ModelMat, 1, GL_FALSE, &model[0][0]);
@@ -37,12 +40,14 @@ void setMatrices() {
 	glUniformMatrix4fv(u_NormalMat, 1, GL_FALSE, &normal[0][0]);
 }
 
+//send lights to GL shader program uniforms
 void setLights() {
 	glUniform3f(u_LightPos, lightPos[0], lightPos[1], lightPos[2]);
 	glUniform3f(u_LightColor, lightColor[0], lightColor[1], lightColor[2]);
 	glUniform3f(u_AmbientLight, ambientLight[0], ambientLight[1], ambientLight[2]);
 }
 
+//draw one model in GL
 void drawModel(Model &m) {
 	glBindVertexArray(m.varr);
 
@@ -63,27 +68,29 @@ void drawModel(Model &m) {
 	glDrawArrays(GL_TRIANGLES, 0, m.nVerts);
 }
 
+//draw a model for this object based on the current rendering mode (i.e. main meshes, occluders, bounding boxes, etc.)
 void drawModelCollection(ModelCollection &m) {
+	//recompute some matrices
 	model = m.modelMatrix;
 	mvp = project * view * model;
-	if (drawModelType == OCCLUDER) {
+
+	if (drawModelType == OCCLUDER) { //just the occluder mesh
 		drawModel(m.occluder);
-	} else if (drawModelType == BOX) {
+	} else if (drawModelType == BOX) { //just the bounding box
 		drawModel(m.box);
-	} else if (drawModelType == MARKER) {
+	} else if (drawModelType == MARKER) { //just the marker
 		drawModel(m.marker);
-	} else if (drawModelType == MARKER2) {
+	} else if (drawModelType == MARKER2) { //the marker and main mesh
 		drawModel(m.marker);
 		drawModel(m.main);
-	} else {
+	} else { //just the main mesh
 		drawModel(m.main);
 	}
 }
 
-
-
-void makeScene3() {
-	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 1.0f);
+//make default scene
+void makeDefaultScene() {
+	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 1.0f); //used to show where the light is
 	ModelCollection orangeOffice = parseModelCollection("models/office/main.obj", 0.5f, 0.1f, 0.0f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection greenOffice = parseModelCollection("models/office/main.obj", 0.1f, 0.4f, 0.0f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection purpleOffice = parseModelCollection("models/office/main.obj", 0.4f, 0.0f, 0.7f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
@@ -92,7 +99,7 @@ void makeScene3() {
 	ModelCollection brownOffice = parseModelCollection("models/office/main.obj", 0.45f, 0.18f, 0.07f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection yellowOffice = parseModelCollection("models/office/main.obj", 0.4, 0.4f, 0.07f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 
-	//Big
+	//Buildings outside of the "city block" of buildings
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -105,7 +112,7 @@ void makeScene3() {
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
-	//1
+	//row 1
 	redOffice.modelMatrix = glm::mat4();
 	redOffice.modelMatrix = glm::translate(redOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -20.0f));
 	redOffice.modelMatrix = glm::scale(redOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
@@ -136,7 +143,7 @@ void makeScene3() {
 	blueOffice.modelMatrix = glm::rotate(blueOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(blueOffice);
 
-	//2
+	//row 2
 	greenOffice.modelMatrix = glm::mat4();
 	greenOffice.modelMatrix = glm::translate(greenOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -28.0f));
 	greenOffice.modelMatrix = glm::scale(greenOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
@@ -167,7 +174,7 @@ void makeScene3() {
 	purpleOffice.modelMatrix = glm::rotate(purpleOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(purpleOffice);
 
-	//3
+	//row 3
 	blueOffice.modelMatrix = glm::mat4();
 	blueOffice.modelMatrix = glm::translate(blueOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -36.0f));
 	blueOffice.modelMatrix = glm::scale(blueOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
@@ -198,7 +205,7 @@ void makeScene3() {
 	yellowOffice.modelMatrix = glm::rotate(yellowOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(yellowOffice);
 
-	//4
+	//row 4
 	orangeOffice.modelMatrix = glm::mat4();
 	orangeOffice.modelMatrix = glm::translate(orangeOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -44.0f));
 	orangeOffice.modelMatrix = glm::scale(orangeOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
@@ -229,7 +236,7 @@ void makeScene3() {
 	greenOffice.modelMatrix = glm::rotate(greenOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(greenOffice);
 
-	//5
+	//row 5
 	yellowOffice.modelMatrix = glm::mat4();
 	yellowOffice.modelMatrix = glm::translate(yellowOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -52.0f));
 	yellowOffice.modelMatrix = glm::scale(yellowOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
@@ -260,7 +267,7 @@ void makeScene3() {
 	redOffice.modelMatrix = glm::rotate(redOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(redOffice);
 
-	//6
+	//row 6
 	purpleOffice.modelMatrix = glm::mat4();
 	purpleOffice.modelMatrix = glm::translate(purpleOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -60.0f));
 	purpleOffice.modelMatrix = glm::scale(purpleOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
@@ -291,7 +298,7 @@ void makeScene3() {
 	orangeOffice.modelMatrix = glm::rotate(orangeOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(orangeOffice);
 
-	//7
+	//row 7
 	redOffice.modelMatrix = glm::mat4();
 	redOffice.modelMatrix = glm::translate(redOffice.modelMatrix, glm::vec3(-20.0f, 0.0f, -68.0f));
 	redOffice.modelMatrix = glm::scale(redOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
@@ -323,7 +330,8 @@ void makeScene3() {
 	sceneModels.push_back(blueOffice);
 }
 
-void makeScene2() {
+//make the alternate scene
+void makeAlternateScene() {
 	cube = parseObj("models/cube.obj", 1.0f, 1.0f, 0.0f);
 	ModelCollection orangeOffice = parseModelCollection("models/office/main.obj", 0.5f, 0.1f, 0.0f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
 	ModelCollection greenOffice = parseModelCollection("models/office/main.obj", 0.1f, 0.4f, 0.0f, "models/office/occluder2.obj", "models/office/box2.obj", "models/office/marker.obj");
@@ -338,17 +346,16 @@ void makeScene2() {
 	ground.modelMatrix = glm::translate(ground.modelMatrix, glm::vec3(0.0f, -3.5f, 0.0f));
 	ground.modelMatrix = glm::scale(ground.modelMatrix, glm::vec3(200.0f, 0.2f, 200.0f));
 	ground.modelMatrix = glm::rotate(ground.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	//sceneModels.push_back(ground);
+	sceneModels.push_back(ground);
 
-	//Big
+	//Big building
 	brownOffice.modelMatrix = glm::mat4();
 	brownOffice.modelMatrix = glm::translate(brownOffice.modelMatrix, glm::vec3(0.0f, 2.0f, -10.0f));
 	brownOffice.modelMatrix = glm::scale(brownOffice.modelMatrix, glm::vec3(6.0f, 4.0f, 2.0f));
 	brownOffice.modelMatrix = glm::rotate(brownOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 2.0f, 0.0f));
 	sceneModels.push_back(brownOffice);
 
-
-	//Left 1
+	//Left row 1
 	blueOffice.modelMatrix = glm::mat4();
 	blueOffice.modelMatrix = glm::translate(blueOffice.modelMatrix, glm::vec3(-40.0f, 0.0f, -50.0f));
 	blueOffice.modelMatrix = glm::scale(blueOffice.modelMatrix, glm::vec3(1.0f, 2.3f, 1.0f));
@@ -367,7 +374,7 @@ void makeScene2() {
 	blueOffice.modelMatrix = glm::rotate(blueOffice.modelMatrix, (GLfloat) PI / 4.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(blueOffice);
 
-	//Left 2
+	//Left row 2
 	yellowOffice.modelMatrix = glm::mat4();
 	yellowOffice.modelMatrix = glm::translate(yellowOffice.modelMatrix, glm::vec3(-48.0f, 0.0f, -70.0f));
 	yellowOffice.modelMatrix = glm::scale(yellowOffice.modelMatrix, glm::vec3(-1.0f, 2.4f, 1.0f));
@@ -386,7 +393,7 @@ void makeScene2() {
 	redOffice.modelMatrix = glm::rotate(redOffice.modelMatrix, (GLfloat) PI / 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(redOffice);
 
-	//Left 3
+	//Left row 3
 	redOffice.modelMatrix = glm::mat4();
 	redOffice.modelMatrix = glm::translate(redOffice.modelMatrix, glm::vec3(-45.0f, 0.0f, -90.0f));
 	redOffice.modelMatrix = glm::scale(redOffice.modelMatrix, glm::vec3(1.0f, 2.0f, -1.0f));
@@ -405,7 +412,7 @@ void makeScene2() {
 	orangeOffice.modelMatrix = glm::rotate(orangeOffice.modelMatrix, (GLfloat) -PI / 6.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(orangeOffice);
 
-	//Right 1
+	//Right row 1
 	greenOffice.modelMatrix = glm::mat4();
 	greenOffice.modelMatrix = glm::translate(greenOffice.modelMatrix, glm::vec3(0.0f, 0.0f, -30.0f));
 	greenOffice.modelMatrix = glm::scale(greenOffice.modelMatrix, glm::vec3(1.0f, 2.0f, 1.0f));
@@ -424,7 +431,7 @@ void makeScene2() {
 	orangeOffice.modelMatrix = glm::rotate(orangeOffice.modelMatrix, (GLfloat) PI / 6.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(orangeOffice);
 
-	//Right 1
+	//Right row 2
 	yellowOffice.modelMatrix = glm::mat4();
 	yellowOffice.modelMatrix = glm::translate(yellowOffice.modelMatrix, glm::vec3(-2.0f, 0.0f, -45.0f));
 	yellowOffice.modelMatrix = glm::scale(yellowOffice.modelMatrix, glm::vec3(1.0f, 2.0f, 1.0f));
@@ -450,11 +457,14 @@ void makeScene2() {
 	sceneModels.push_back(purpleOffice);
 }
 
-bool modelComparator(const ModelCollection& m1, const ModelCollection& m2) {
+//Compare models -- used to sort objects in the scene
+bool modelComparator(ModelCollection& m1, ModelCollection& m2) {
 	return distSquaredToCamera(m1) < distSquaredToCamera(m2);
 }
 
-void render2() {
+//render the current scene
+void renderScene() {
+	//update the light position (make the light move in a circle around the scene)
 	double seconds = clock() / (double)CLOCKS_PER_SEC;
 	lightPos = glm::vec3(50.0f * cos(seconds * 2.0), 8.0f, 50.0f * sin(seconds * 2.0) - 40.0f);
 
@@ -464,23 +474,25 @@ void render2() {
 	setLights();
 
 
+	//sort the scene objects
 	std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
 
-	size_t drawn = 0;
+	size_t drawn = 0; //objects drawn this frame
 	dBuffer.reset();
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
 		if (shouldDraw(*it)) {
 			drawModelCollection(*it);
 			drawn++;
-		} else {
-			//std::cout << "skipped " << currentFrame << std::endl;
 		}
 	}
 
+
+	//record stats: frame, scene models, models drawn
 	if (recordStats) {
 		statsFile << currentFrame << " " << sceneModels.size() << " " << drawn << std::endl;
 	}
 
+	//draw cube at light source
 	model = glm::mat4();
 	model = glm::translate(model, lightPos + glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
@@ -488,11 +500,17 @@ void render2() {
 	drawModel(cube);
 }
 
-double distSquaredToCamera(const ModelCollection &m) {
+
+bool firstFrame = true; //use this for caching
+double distSquaredToCamera(ModelCollection &m) {
+	if (m.lastSorted == currentFrame) { //if already cached, return cached result
+		return m.dist2ToCamera;
+	}
+
+	//otherwise compute result
 	glm::vec4 transformed = view * m.modelMatrix * glm::vec4(m.boxCenter, 1.0f);
 	glm::vec3 p = glm::vec3(transformed / transformed.a);
-	return ((double)p.x * (double)p.x) + ((double)p.y * (double)p.y) + ((double)p.z * (double)p.z);
+	m.dist2ToCamera = ((double)p.x * (double)p.x) + ((double)p.y * (double)p.y) + ((double)p.z * (double)p.z);
+
+	return m.dist2ToCamera;
 }
-
-
-

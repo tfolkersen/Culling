@@ -15,8 +15,8 @@ int drawModelType = MAIN;
 std::string replayFileName = "replay.txt";
 std::fstream replayFile;
 
-uint64_t currentFrame = 0;
-uint64_t nextReplayFrame = 0;
+uint64_t currentFrame = 1;
+uint64_t nextReplayFrame = 1;
 bool recordedFrameNumber = false;
 
 /*	every frame:

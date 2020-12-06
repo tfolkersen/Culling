@@ -47,6 +47,11 @@ struct ModelCollection {
 
 	glm::mat4 modelMatrix; //model matrix for this object
 
+
+	uint64_t lastSorted; //frame that this object's center was last transformed on
+	glm::vec3 transformedCenter; //center transformed for this frame
+	double dist2ToCamera; //squared distance to camera this frame
+
 	ModelCollection();
 
 	ModelCollection(const ModelCollection& m); //copy constructor

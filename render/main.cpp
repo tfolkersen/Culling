@@ -47,7 +47,7 @@ void init() {
 	project = glm::perspective(glm::radians(90.0f), (GLfloat) SCREEN_WIDTH / (GLfloat) SCREEN_HEIGHT, NEAR, FAR);
 
 	//Initialize the scene
-	makeScene3();
+	makeDefaultScene();
 
 	//Initialize replay and stats files
 	if (replayMode == PLAY) {
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
 		recordedFrameNumber = false;
 
 		clock_t start = clock();
-		render2();
+		renderScene();
 		glfwSwapBuffers(window);
 
 		glfwPollEvents();

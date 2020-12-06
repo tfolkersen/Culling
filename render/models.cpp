@@ -16,8 +16,10 @@ Model::Model(const Model &m) {
 	this->nVerts = m.nVerts;
 }
 
-//empty ModelCollection constructor
+//ModelCollection constructor
 ModelCollection::ModelCollection() {
+	lastSorted = 0;
+	dist2ToCamera = 0;
 }
 
 //copy ModelCollection constructor
@@ -29,6 +31,9 @@ ModelCollection::ModelCollection(const ModelCollection &m) {
 	this->boxData = m.boxData;
 	this->modelMatrix = m.modelMatrix;
 	this->marker = m.marker;
+	this->lastSorted = m.lastSorted;
+	this->transformedCenter = m.transformedCenter;
+	this->dist2ToCamera = m.dist2ToCamera;
 }
 
 //parse one obj file into a Model -- see header for details

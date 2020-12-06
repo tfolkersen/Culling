@@ -1,5 +1,12 @@
 #pragma once
 
+/*		draw file
+
+	this file is responsible for rendering scenes
+
+	this header defines some parameters for rendering (screen dimensions)
+
+*/
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -9,52 +16,60 @@
 
 #define FPS 60 //Max frames per second
 
+//screen dimensions -- should probably match the depth buffer dimensions but this isn't necessary
 #define SCREEN_WIDTH 1440
 #define SCREEN_HEIGHT 1024
 
+//distances of near and far planes for perspective projection
 #define NEAR 0.01f
 #define FAR 200.0f
 
+extern GLuint programID; //GL program ID of shader program
+extern GLFWwindow* window; //GLFW window of main window
 
-extern GLuint programID;
-extern GLFWwindow* window;
-
+//uniform locations in shader program
 extern GLuint u_LightPos, u_LightColor, u_AmbientLight, u_MvpMat, u_ModelMat, u_NormalMat;
 
+//light parameters -- these are updated in the scene's render function
 extern glm::vec3 lightPos;
 extern glm::vec3 lightColor;
 extern glm::vec3 ambientLight;
 
-extern glm::mat4 mvp;
-extern glm::mat4 model;
-extern glm::mat4 normal;
-extern glm::mat4 view;
-extern glm::mat4 project;
+extern glm::mat4 mvp; //mvp matrix
+extern glm::mat4 model; //current model matrix
+extern glm::mat4 normal; //normal matrix -- set by drawModel
+extern glm::mat4 view; //view matrix
+extern glm::mat4 project; //projection matrix (perspective)
 
-extern std::fstream statsFile;
-extern bool recordStats;
+extern std::fstream statsFile; //file to record stats to
+extern bool recordStats; //should stats be recorded?
 
+//models in the current scene
 extern std::vector<ModelCollection> sceneModels;
 
-
-
+//send matrices to GL program
 void setMatrices();
 
+//send light parameters to GL program
 void setLights();
 
+//render one model in GL
 void drawModel(Model& m);
 
+//render a model from an object in GL according to the current rendering mode
 void drawModelCollection(ModelCollection& m);
 
-void makeModels();
+//load models for default scene
+void makeAlternateScene();
 
-void render();
+//load models for alternate scene
+void makeDefaultScene();
 
+//comparator for models based on depth -- use to sort scene by depth
+bool modelComparator(ModelCollection& m1, ModelCollection& m2);
 
-void makeScene2();
-void makeScene3();
-bool modelComparator(const ModelCollection& m1, const ModelCollection& m2);
+//render scene
+void renderScene();
 
-void render2();
-
-double distSquaredToCamera(const ModelCollection& m);
+//distance of an object to the camera based on current view of the scene
+double distSquaredToCamera(ModelCollection& m);
