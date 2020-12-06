@@ -1,5 +1,11 @@
 #pragma once
 
+/*	control file
+
+	this handles user input and recording/playback of replays
+	also defines parameters of movement (camera speed/mouse sensitivity)
+*/
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>

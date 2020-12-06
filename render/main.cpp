@@ -1,3 +1,7 @@
+/*	main file -- this is where execution starts
+*/
+
+
 #include <iostream>
 
 //GL stuff
