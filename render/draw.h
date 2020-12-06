@@ -69,7 +69,7 @@ void makeAlternateScene();
 void makeDefaultScene();
 
 //comparator for models based on depth -- use to sort scene by depth
-bool modelComparator(ModelCollection& m1, ModelCollection& m2);
+bool modelPointerComparator(ModelCollection* m1, ModelCollection* m2);
 
 //render scene
 void renderScene();

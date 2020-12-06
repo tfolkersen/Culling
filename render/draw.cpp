@@ -28,6 +28,7 @@ glm::mat4 project;
 
 //objects in the current scene
 std::vector<ModelCollection> sceneModels;
+std::vector<ModelCollection*> sceneModelPointers;
 
 std::fstream statsFile; //file to record stats to
 bool recordStats = false; //should stats be recorded?
@@ -330,6 +331,10 @@ void makeDefaultScene() {
 	blueOffice.modelMatrix = glm::scale(blueOffice.modelMatrix, glm::vec3(1.0f, 1.5f, 1.0f));
 	blueOffice.modelMatrix = glm::rotate(blueOffice.modelMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(blueOffice);
+
+	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
+		sceneModelPointers.push_back(&(*it));
+	}
 }
 
 //make the alternate scene
@@ -457,11 +462,15 @@ void makeAlternateScene() {
 	purpleOffice.modelMatrix = glm::scale(purpleOffice.modelMatrix, glm::vec3(-6.0f, 2.0f, 6.0f));
 	purpleOffice.modelMatrix = glm::rotate(purpleOffice.modelMatrix, (GLfloat) 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneModels.push_back(purpleOffice);
+
+	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
+		sceneModelPointers.push_back(&(*it));
+	}
 }
 
 //Compare models -- used to sort objects in the scene by their distance to the camera
-bool modelComparator(ModelCollection& m1, ModelCollection& m2) {
-	return distSquaredToCamera(m1) < distSquaredToCamera(m2);
+bool modelPointerComparator(ModelCollection *m1, ModelCollection *m2) {
+	return distSquaredToCamera(*m1) < distSquaredToCamera(*m2);
 }
 
 //render the current scene
@@ -477,13 +486,13 @@ void renderScene() {
 
 
 	//sort the scene objects
-	std::sort(sceneModels.begin(), sceneModels.end(), modelComparator);
+	std::sort(sceneModelPointers.begin(), sceneModelPointers.end(), modelPointerComparator);
 
 	size_t drawn = 0; //objects drawn this frame
 	dBuffer.reset();
-	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
-		if (shouldDraw(*it)) {
-			drawModelCollection(*it);
+	for (auto it = sceneModelPointers.begin(); it != sceneModelPointers.end(); it++) {
+		if (shouldDraw(**it)) {
+			drawModelCollection(**it);
 			drawn++;
 		}
 	}
