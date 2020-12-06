@@ -120,7 +120,7 @@ void convertVec(glm::vec2 &v) {
 	v.y = -(Hf / 2.0) * v.y + (Hf / 2.0);
 }
 
-//wait for this amount of time
+//wait for this amount of time -- busy wait because windows function didn't work for some reason
 void fpsWait(double seconds) {
 	if (seconds < 0) {
 		return;

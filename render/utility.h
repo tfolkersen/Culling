@@ -3,7 +3,6 @@
 /*		utility file
 
 	this file is responsible for miscellaneous functions
-
 */
 
 #include <GL/glew.h>
@@ -62,7 +61,6 @@ std::vector<std::string> split(std::string str, std::string del);
 	if this causes lockups it might need to be modified
 */
 void fixTriangle(glm::vec2& t1, glm::vec2& t2, glm::vec2& t3);
-
 
 /*
 	convert vector from NDC space to pixel space

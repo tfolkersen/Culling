@@ -116,7 +116,7 @@ void handlePlayback() {
 
 //record frame number of this frame into replay file if not already done
 void recordFrameNumber() {
-	if (recordedFrameNumber) {
+	if (recordedFrameNumber || replayMode != RECORD) {
 		return;
 	}
 	recordedFrameNumber = true;

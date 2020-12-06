@@ -165,6 +165,7 @@ glm::vec3 modelDataCenter(const std::vector<GLfloat> &data) {
 	GLfloat minZ = data[2];
 	GLfloat maxZ = minZ;
 
+	//find mins and maxes
 	for (auto it = data.begin(); it != data.end();) {
 		minX = std::min(minX, *it);
 		maxX = std::max(maxX, *it);

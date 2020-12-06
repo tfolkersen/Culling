@@ -5,12 +5,11 @@
 
 	this implements the occlusion culling logic:
 	rasterization of occluders, depth test, updating of depth buffer, and
-	data structures for this
+	data structures for these things
 
 	also defines parameters of the culling logic
 
-	the tiles of the depth buffer are called "Blocks"
-
+	the tiles of the depth buffer are called "Blocks" in this code
 */
 
 #include <GL/glew.h>
@@ -21,7 +20,7 @@
 #include <vector>
 
 
-//these should match screen resolution defined in draw.h
+//these should match screen resolution defined in draw.h, but they don't need to
 #define BUFFER_WIDTH 1440 //width in pixels of depth buffer -- must be a multiple of 32 (width of uint32_t)
 #define BUFFER_HEIGHT 1024 //height in pixels of depth buffer -- must be a multiple of BLOCK_HEIGHT
 
@@ -82,4 +81,5 @@ struct DepthBuffer {
 extern DepthBuffer dBuffer; //global depth buffer
 
 //true if object should be drawn according to depth buffer -- also updates depth buffer
+//this is the function used in the renderer
 bool shouldDraw(const ModelCollection& m);

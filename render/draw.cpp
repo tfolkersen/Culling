@@ -459,7 +459,7 @@ void makeAlternateScene() {
 	sceneModels.push_back(purpleOffice);
 }
 
-//Compare models -- used to sort objects in the scene
+//Compare models -- used to sort objects in the scene by their distance to the camera
 bool modelComparator(ModelCollection& m1, ModelCollection& m2) {
 	return distSquaredToCamera(m1) < distSquaredToCamera(m2);
 }
@@ -501,7 +501,6 @@ void renderScene() {
 	mvp = project * view * model;
 	drawModel(cube);
 }
-
 
 //squared distance from this object to the camera given the current view of the scene
 double distSquaredToCamera(ModelCollection &m) {

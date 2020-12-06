@@ -146,6 +146,7 @@ int main(int argc, char **argv) {
 
 	init();
 
+	//main loop
 	do {
 		recordedFrameNumber = false;
 

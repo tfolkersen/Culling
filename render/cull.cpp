@@ -63,7 +63,7 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 	glm::vec2 l2 = p3 - p1;
 	glm::vec2 l3 = p3 - p2;
 
-	//left-facing normals
+	//left-facing normals (because edges are downward facing)
 	glm::vec2 n1(l1.y, -l1.x);
 	glm::vec2 n2(l2.y, -l2.x);
 	glm::vec2 n3(l3.y, -l3.x);
@@ -182,7 +182,6 @@ void DepthBuffer::reset() {
 
 /*	get block of depth buffer
 
-
 	coordinates refer to blocks
 
 	top left block is 0,0
@@ -207,7 +206,6 @@ void DepthBuffer::print() {
 	}
 }
 
-
 //True if point is inside the near plane -- (false if point is behind camera)
 #define INSIDE(p) \
 	(p.z <= -NEAR)
@@ -227,6 +225,9 @@ void DepthBuffer::print() {
 void transformPoints(const std::vector<GLfloat> &data, std::vector<glm::vec3> &tris, const glm::mat4 &model) {
 	/*
 		I have no idea why, but this scaling and rotation is needed, otherwise the rasterization shows a different view of the object than the GL view...
+
+		in testing, GL and the rasterizer show the same result, except for when the
+		data comes from a Model
 	*/
 	glm::mat4 rot = glm::rotate(glm::mat4(), (GLfloat)-PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, -1.0f));
@@ -245,7 +246,7 @@ void transformPoints(const std::vector<GLfloat> &data, std::vector<glm::vec3> &t
 		t3 = view * model * rot * scale * t3;
 		t3 /= t3.w;
 
-		//now perform clipping
+		//now perform clipping with the near plane
 		std::vector<glm::vec4*> points;
 		std::vector<glm::vec4> face; //face resultant from clipping (can be empty, or be a triangle, or a square)
 		points.push_back(&t1);
@@ -285,7 +286,7 @@ void transformPoints(const std::vector<GLfloat> &data, std::vector<glm::vec3> &t
 			}
 		}
 
-		//project resultant face's points
+		//project resulting face's points
 		for (auto it = face.begin(); it != face.end(); it++) {
 			(*it) = project * (*it);
 			(*it) /= it->w;
@@ -371,12 +372,12 @@ bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat m
 	int jStart = std::max(((int)minX) / 32, 0); 
 	int jEnd = std::min((int)ceil(maxX / 32.0f), (int)dBuffer.widthB - 1);
 
-	for (int i = iStart; i <= iEnd; i++) {
-		for (int j = jStart; j <= jEnd; j++) {
+	for (int i = iStart; i <= iEnd; i++) { //iterate over height
+		for (int j = jStart; j <= jEnd; j++) { //iterate over width
 			Block& b = dBuffer.getBlock(j, i);
 
 			if (b.reference >= minZ) {
-				return true; //bounding box is visible in this block -- so object is considered visible
+				return true; //bounding box might be visible in this block -- so object is considered visible
 			}
 		}
 	}
@@ -411,7 +412,7 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 	glm::vec2 l2 = p3 - p1;
 	glm::vec2 l3 = p3 - p2;
 
-	//left-facing normals
+	//left-facing normals (because of the downward facing edges)
 	glm::vec2 n1(l1.y, -l1.x);
 	glm::vec2 n2(l2.y, -l2.x);
 	glm::vec2 n3(l3.y, -l3.x);
@@ -554,6 +555,8 @@ void updateDepthBuffer(const ModelCollection &m) {
 /*		true if object is visible and should be drawn
 
 	does bounding box visibility test, and if visible, will update the depth buffer using the occluder
+
+	call this function in the renderer
 */
 bool shouldDraw(const ModelCollection& m) {
 	//Transform bounding box into bounding square
