@@ -70,6 +70,8 @@ Other controls:
 * F — this swaps the rendering mode (more info further down the README)
 * Escape — close the program
 
+Use the mouse to look around.
+
 ### Render modes
 Cycle through these modes in this order by pressing F. These modes only affect what's displayed in the window, and don't affect the culling logic at all.
 
