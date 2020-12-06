@@ -78,7 +78,7 @@ Cycle through these modes in this order by pressing F. These modes only affect w
 * Main/default — show the meshes that should be rendered in the scene.
 * Occluders — (low poly, red meshes) show the occlusion meshes that get rasterized into the depth buffer by the culling logic.
 * Bounding boxes — (yellow boxes) show the bounding boxes that are used for visibility tests by the culling logic.
-* Markers only — (narrow blue pillars) show markers near the centers of objects, used to visualize culling effect better.
+* Markers only — (narrow blue pillars) show markers near the centers of objects; used to better visualize culling effect.
 * Markers and main — (main meshes and narrow blue pillars) show the main meshes and the blue pillars together. Another way of visualizing culling effect.
 
 ### Replays
