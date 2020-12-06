@@ -501,7 +501,6 @@ void renderScene() {
 }
 
 
-bool firstFrame = true; //use this for caching
 double distSquaredToCamera(ModelCollection &m) {
 	if (m.lastSorted == currentFrame) { //if already cached, return cached result
 		return m.dist2ToCamera;
