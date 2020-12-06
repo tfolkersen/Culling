@@ -28,7 +28,8 @@ Because this is a fork of the opengl-tutorial code, these instructions are based
 * Open Tutorials.sln in root/build
 * Make sure the solution configuration in Visual Studio is set to "Release" and not "Debug", or else the code will be too slow (this option should be near the top of the window)
 * Build the solution named "render"
-* root/render/render.exe is the executable to run
+* root/render/render.exe is the executable to run.
+
 There are solutions other than "render" that are an artifact of the tutorial code, but you shouldn't need to build these.
 
 ## Usage
