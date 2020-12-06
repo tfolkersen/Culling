@@ -12,7 +12,7 @@ by user "lukass12"/"Lukas carnota"
 
 Implements "masked occlusion culling" as proposed in the paper "Masked Software Occlusion Culling" by J. Hasselgren, M. Andersson, and T. Akenine-Möller. However, I don't use AVX or any other kind of SIMD instructions, so my solution is not as performant as theirs.
 
-The original AVX implementation only supports floating point operations, and the rasterization step uses bit shifts. Attempts to speed up the culling logic using only AVX floating point instructions seemed to slow down the solution, as there's some overhead involved.
+I only have the first version of AVX, which only supports floating point operations, and the rasterization step uses bit shifts. Attempts to speed up the culling logic using only AVX floating point instructions seemed to slow down the solution, as there's some overhead involved.
 
 ## Building
 Because this is a fork of the opengl-tutorial code, these instructions are based on the ones from here http://www.opengl-tutorial.org/beginners-tutorials/tutorial-1-opening-a-window/
