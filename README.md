@@ -44,8 +44,8 @@ Flags go in any order and are:
 -p and -s are mutually exclusive
 
 Example: 
-```./render.exe -p -a```
-Will play the replay file in the alternate scene
+```./render.exe -p -a -s```
+Will play the replay file in the alternate scene and will output statistics.
 
 With no flags, the user is free to move around the default scene without outputting statistics or recording a replay
 
@@ -75,3 +75,10 @@ Cycle through these modes in this order by pressing F. These modes only affect w
 * Bounding boxes — (yellow boxes) show the bounding boxes that are used for visibility tests by the culling logic.
 * Markers only — (narrow blue pillars) show markers near the centers of objects, used to visualize culling effect better.
 * Markers and main — (main meshes and narrow blue pillars) show the main meshes and the blue pillars together. Another way of visualizing culling effect.
+
+### Replays
+The replay file is stored in root/render/replay.txt. You must record before you can playback. With the -r flag, all actions are recorded except for toggling the render mode. Replays store movements instead of keys pressed, so you can modify things like the camera movement speed in control.h and the replay should still work.
+
+Playback is done with the -p flag, and the program will close if there is no replay.txt file. Replays don't know which scene they were recorded in, so if you use the flags ```-r -a``` and then use only the flag ```-p``` it will playback in the wrong scene.
+
+Replays are a way to gather statistics across different versions of the program, under the same scene and actions. For example, you can modify the culling logic and then generate new statistics in the same environment using replays. 
