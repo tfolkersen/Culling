@@ -41,6 +41,8 @@ Numpy version 1.19.4 doesn't seem to work on Windows in Python 3.9 and is needed
 
 ```python3 -m pip install matplotlib```
 
+The command might be "python" instead of "python3" depending on your installation.
+
 ## Usage
 Open render.exe from the command-line
 
