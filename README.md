@@ -1,6 +1,6 @@
 # Occlusion Culling Project
 
-OpenGL code, libraries, CMake files, and libraries based on tutorial from:
+OpenGL code, CMake files, and libraries based on tutorial from:
 http://www.opengl-tutorial.org/
 
 Forked from
