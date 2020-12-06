@@ -36,6 +36,7 @@ There are solutions other than "render" that are an artifact of the tutorial cod
 
 To parse the stats.txt file and make plots, you will need Python 3 and Matplotlib. 
 Numpy version 1.19.4 doesn't seem to work on Windows in Python 3.9 and is needed by Matplotlib. You can install an older Numpy and then Matplotlib like so:
+
 ```python3 -m pip install numpy==1.19.3```
 ```python3 -m pip install matplotlib```
 
