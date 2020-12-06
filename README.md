@@ -8,7 +8,7 @@ https://github.com/opengl-tutorials/ogl
 
 Office building model from here:
 https://www.cgtrader.com/free-3d-models/exterior/office/free-office-building
-by user "lukass12"
+by user "lukass12"/"Lukas carnota"
 
 Implements "masked occlusion culling" as proposed in the paper "Masked Software Occlusion Culling" by J. Hasselgren, M. Andersson, and T. Akenine-Möller. However, I don't use AVX or any other kind of SIMD instructions, so my solution is not as performant as theirs.
 
