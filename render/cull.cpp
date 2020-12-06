@@ -151,7 +151,7 @@ void Block::reset() {
 		bits[i] = 0;
 	}
 	reference = 1.0f;
-	working = 1.0f;
+	working = 0.0f;
 
 }
 
