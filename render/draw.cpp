@@ -2,6 +2,7 @@
 #include "control.h"
 #include "cull.h"
 #include <ctime>
+#include <chrono>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include "utility.h"
@@ -29,6 +30,10 @@ glm::mat4 project;
 //objects in the current scene
 std::vector<ModelCollection> sceneModels;
 std::vector<ModelCollection*> sceneModelPointers;
+
+//One flag for each model, first the culling logic sets these and then they are drawn.
+//this decouples drawing and culling so that statistics can be gathered
+std::vector<int> sceneModelFlags;
 
 std::fstream statsFile; //file to record stats to
 bool recordStats = false; //should stats be recorded?
@@ -334,6 +339,7 @@ void makeDefaultScene() {
 
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
 		sceneModelPointers.push_back(&(*it));
+		sceneModelFlags.push_back(0);
 	}
 }
 
@@ -465,6 +471,7 @@ void makeAlternateScene() {
 
 	for (auto it = sceneModels.begin(); it != sceneModels.end(); it++) {
 		sceneModelPointers.push_back(&(*it));
+		sceneModelFlags.push_back(0);
 	}
 }
 
@@ -484,23 +491,35 @@ void renderScene() {
 
 	setLights();
 
+	size_t modelCount = sceneModelPointers.size(); //don't access vector::size() every iteration
 
-	//sort the scene objects
-	std::sort(sceneModelPointers.begin(), sceneModelPointers.end(), modelPointerComparator);
+	//Start of culling
 
-	size_t drawn = 0; //objects drawn this frame
+	std::chrono::high_resolution_clock::time_point cullStart = std::chrono::high_resolution_clock::now();
+	std::sort(sceneModelPointers.begin(), sceneModelPointers.end(), modelPointerComparator); //sort scene objects
 	dBuffer.reset();
-	for (auto it = sceneModelPointers.begin(); it != sceneModelPointers.end(); it++) {
-		if (shouldDraw(**it)) {
-			drawModelCollection(**it);
+	for (size_t i = 0; i < modelCount; i++) {
+		sceneModelFlags[i] = 0;
+		if (shouldDraw(*sceneModelPointers[i])) {
+			sceneModelFlags[i] = 1;
+		}
+	}
+	std::chrono::high_resolution_clock::time_point cullEnd = std::chrono::high_resolution_clock::now();
+	//end of culling
+
+	//do drawing
+	size_t drawn = 0;
+	for (size_t i = 0; i < modelCount; i++) {
+		if (sceneModelFlags[i]) {
+			drawModelCollection(*sceneModelPointers[i]);
 			drawn++;
 		}
 	}
 
-
-	//record stats: frame, scene models, models drawn
+	//record stats: frame, drawn fraction, culling time
 	if (recordStats) {
-		statsFile << currentFrame << " " << sceneModels.size() << " " << drawn << std::endl;
+		std::chrono::duration<double, std::milli> cullTime = cullEnd - cullStart;
+		statsFile << "f " << currentFrame << " df " << (double)drawn / (double)sceneModelPointers.size() << " ct " << cullTime.count() <<  std::endl;
 	}
 
 	//draw cube at light source

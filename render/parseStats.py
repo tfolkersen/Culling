@@ -2,29 +2,49 @@ import sys
 import matplotlib.pyplot as plt
 
 argc = len(sys.argv)
-if argc != 2:
-    print("Usage: python3 " + sys.argv[0] + " fileName")
+if argc < 2 + 3 or (argc - 2) % 3 != 0:
+    print("Usage: python3 " + sys.argv[0] + " yLabel" + " (fileName statIdentifier label)+")
 
-fileName = sys.argv[1]
+xDatas = []
+yDatas = []
+labels = []
 
-f = open(fileName, "r")
+def getStat(identifier, line):
+    i = line.index(identifier)
+    if i == -1:
+        raise "Stat identifier not found"
+    val = line[i + 1]
+    return val
 
-frames = []
-totals = []
-drawns = []
 
-for line in f:
-    line = line.split(" ")
-    frames.append(int(line[0]))
-    totals.append(int(line[1]))
-    drawns.append(int(line[2]))
+for i in range(2, argc, 3):
+    fileName = sys.argv[i]
+    f = open(fileName, "r")
 
-fracs = [drawns[i] / float(totals[i]) for i in range(0, len(drawns))]
-f.close()
+    x = []
+    y = []
+    statId = sys.argv[i + 1]
+    label = sys.argv[i + 2]
 
-plt.plot(frames, fracs)
+    for line in f:
+        line = line.split(" ")
+        frame = int(getStat("f", line))
+        x.append(frame)
+        data = float(getStat(statId, line))
+        y.append(data)
+
+    xDatas.append(x);
+    yDatas.append(y)
+    labels.append(label)
+    f.close()
+
+
+for i in range(len(xDatas)):
+    plt.plot(xDatas[i], yDatas[i], label = labels[i])
+
+plt.legend()
+
 plt.xlabel("frame number")
-plt.ylabel("fraction of models drawn")
-plt.ylim(0.0, 1.0)
+plt.ylabel(sys.argv[1])
 plt.savefig("stats.png")
 
