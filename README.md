@@ -37,7 +37,7 @@ You will need to install the C++ packages in Visual Studio. I use Visual Studio 
 
 There are solutions other than "render" that are an artifact of the tutorial code, but you shouldn't need to build these.
 
-To parse the stats.txt file and make plots, you will need Python 3 and Matplotlib. 
+To parse the stats.txt file and make plots, you will need Python 3 and Matplotlib. You don't need this if you don't want to make plots.
 Numpy version 1.19.4 doesn't seem to work on Windows in Python 3.9 and is needed by Matplotlib. You can install an older Numpy and then Matplotlib like so:
 
 ```python3 -m pip install numpy==1.19.3```
@@ -101,4 +101,15 @@ Playback is done with the -p flag, and the program will close if there is no rep
 Replays are a way to gather statistics across different versions of the program, under the same scene and actions. For example, you can modify the culling logic and then generate new statistics in the same environment using replays. 
 
 ### Statistics
-TODO
+The stats.txt file has one line for each frame, of the format:
+f <frameNumber> df <fraction of drawn objects> ct <time of culling logic (in milliseconds)
+
+to parse these stats into a plot, use parseStats.py
+
+python parseStats.py yAxisLabel (statFileName statIdentifier label)+
+For example:
+
+```python parseStats.py "fraction of objects drawn" stats1.txt df "version 1" stats2.txt df "version 2"```
+
+Will output a plot with the fraction of drawn objects from two files, each representing one run of the program
+
