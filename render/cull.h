@@ -49,6 +49,10 @@ uint32_t line(uint32_t e0, uint32_t e1, uint32_t e2, uint32_t o0, uint32_t o1, u
 */
 void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3);
 
+
+/*
+	Tile as specified by the Hasselgren et al. paper
+*/
 //One block or "tile" of the depth buffer
 //a pixel belongs to the working depth if its bit is set, otherwise it belongs to the reference depth
 struct Block {

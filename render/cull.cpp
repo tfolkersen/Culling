@@ -14,6 +14,9 @@ DepthBuffer dBuffer;
 
 */
 
+/*
+	This code is from the Hasselgren et al. paper
+*/
 //Get bit mask for one scanline -- see header file for details
 uint32_t line(uint32_t e0, uint32_t e1, uint32_t e2, uint32_t o0, uint32_t o1, uint32_t o2) {
 	
@@ -263,6 +266,7 @@ void transformPoints(const std::vector<GLfloat> &data, std::vector<glm::vec3> &t
 			glm::vec4& s = (*it->first);
 			glm::vec4& p = (*it->second);
 
+			//This is the Sutherland-Hodgman clipping algorithm
 			if (INSIDE(s) && INSIDE(p)) {
 				//both inside -- output p
 				face.push_back(p);
@@ -350,6 +354,8 @@ void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX
 	*/
 }
 
+
+//implements depth test as described by the Hasselgren et al. paper
 //given bounding box of object in NDC space (after applying transformBoundingBox), return true if box is visible according to depth buffer
 bool depthTest(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY, GLfloat minZ, GLfloat maxZ) {
 	//bounding rectangle points
@@ -484,7 +490,7 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 		for (int j = jStart; j <= jEnd; j++) { //iterate over width
 			Block& b = dBuffer.getBlock(j, i);
 
-			//This section is the depth buffer update from the paper
+			////////////////////////////This section is the depth buffer update from the Hasselgren et al. paper
 			//zMax is the tri.maxZ in the paper, tile.zMax0 is b.reference, tile.zMax1 is b.working
 
 			//heuristic to throw away working layer -- this is used in the paper to help prevent objects
@@ -522,7 +528,7 @@ void renderIntoDepthBuffer(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3, GLfloat max
 					b.bits[i] = 0;
 				}
 			}
-
+			/////////////////////////////////////
 		}
 	}
 }
