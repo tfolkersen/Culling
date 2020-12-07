@@ -1,3 +1,14 @@
+"""
+    python parseStats.py yAxisLabel (fileName statIdentifier label)+
+
+    stat identifiers are currently:
+    f -- frame number (this is automatically put on the x axis
+    df -- "drawn fraction", fraction of objects drawn in a frame
+    ct -- "culling time", milliseconds that culling logic took this frame
+
+"""
+
+
 import sys
 import matplotlib.pyplot as plt
 
