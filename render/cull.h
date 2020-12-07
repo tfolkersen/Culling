@@ -29,7 +29,11 @@
 //a few AVX instructions
 #define BLOCK_HEIGHT 8
 
-/*	get bit mask for one scanline
+/*	
+
+	this is the function coverageSIMD() from the Hasselgren et al. paper
+
+	get bit mask for one scanline
 
 	e0, e1, e2 are x coordinates of each triangle edge on this scanline,
 	relative to the block's coordinates in pixel space

@@ -149,7 +149,7 @@ void rasterize(glm::vec2 t1, glm::vec2 t2, glm::vec2 t3) {
 }
 
 //clear block by settings its depths to 1.0 (the maximum depth) and clearing mask
-void Block::reset() {
+void Block::reset() { //reset as specified by the Hasselgren et al. paper
 	for (int i = 0; i < BLOCK_HEIGHT; i++) {
 		bits[i] = 0;
 	}
