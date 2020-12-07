@@ -102,7 +102,7 @@ Replays are a way to gather statistics across different versions of the program,
 
 ### Statistics
 The stats.txt file has one line for each frame, of the format:
-f <frameNumber> df <fraction of drawn objects> ct <time of culling logic (in milliseconds)
+f (frameNumber) df (fraction of drawn objects) ct (time of culling logic (in milliseconds))
 
 to parse these stats into a plot, use parseStats.py
 
