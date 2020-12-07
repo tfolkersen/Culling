@@ -337,6 +337,7 @@ void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX
 		maxZ = std::max(maxZ, p.z);
 	}
 
+	/* don't clamp -- allow invalid ranges
 	//clamp these results to be within [-1,1]
 	minX = std::max(minX, -1.0f);
 	maxX = std::min(maxX, 1.0f);
@@ -346,6 +347,7 @@ void transformBoundingBox(const ModelCollection &m, GLfloat &minX, GLfloat &maxX
 
 	minZ = std::max(minZ, -1.0f);
 	maxZ = std::min(maxZ, 1.0f);
+	*/
 }
 
 //given bounding box of object in NDC space (after applying transformBoundingBox), return true if box is visible according to depth buffer
